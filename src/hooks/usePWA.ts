@@ -13,6 +13,7 @@ interface PWAState {
   dismissInstall: () => void;
   dismissUpdate: () => void;
   applyUpdate: () => void;
+  forceReload: () => void;
 }
 
 export function usePWA(): PWAState {

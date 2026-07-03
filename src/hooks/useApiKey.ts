@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 
 const API_KEY_STORAGE_KEY = 'pokedex_gemini_api_key';
 
