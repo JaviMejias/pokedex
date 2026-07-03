@@ -1,0 +1,260 @@
+.rotom-dex-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--space-4);
+  animation: fadeIn 0.2s ease;
+}
+
+.rotom-dex {
+  width: 100%;
+  max-width: 360px;
+  background: #ff5252;
+  border-radius: 20px;
+  border: 4px solid #cc0000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 2px 10px rgba(255, 255, 255, 0.3);
+  animation: slideInRight 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.rotom-dex__header {
+  background: #ff2a2a;
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border-bottom: 3px solid #cc0000;
+}
+
+.rotom-dex__eyes {
+  display: flex;
+  gap: 4px;
+}
+
+.rotom-dex__eye {
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-radius: 50%;
+  border: 2px solid #000;
+  position: relative;
+  overflow: hidden;
+}
+
+.rotom-dex__eye::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 4px;
+  height: 4px;
+  background: #000;
+  border-radius: 50%;
+}
+
+.rotom-dex__title {
+  flex: 1;
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 1px 1px 0 #cc0000;
+  margin: 0;
+  letter-spacing: 0.05em;
+}
+
+.rotom-dex__close {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.rotom-dex__close:hover {
+  opacity: 1;
+}
+
+.rotom-dex__chat {
+  flex: 1;
+  background: #f0f0f0;
+  padding: var(--space-4);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border-bottom: 3px solid #cc0000;
+}
+
+.rotom-dex__msg-wrapper {
+  display: flex;
+  width: 100%;
+}
+
+.rotom-dex__msg-wrapper--user {
+  justify-content: flex-end;
+}
+
+.rotom-dex__msg-wrapper--model {
+  justify-content: flex-start;
+}
+
+.rotom-dex__msg {
+  max-width: 85%;
+  padding: var(--space-3);
+  border-radius: 12px;
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  font-weight: 500;
+}
+
+.rotom-dex__msg--user {
+  background: #3b82f6;
+  color: #fff;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+.rotom-dex__msg--model {
+  background: #fff;
+  color: #333;
+  border-bottom-left-radius: 4px;
+  border: 2px solid #ff5252;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  font-family: var(--font-display);
+}
+
+.rotom-dex__msg--loading {
+  background: #fff;
+  color: #ff5252;
+  border: 2px solid #ff5252;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  display: flex;
+  gap: 2px;
+}
+
+.rotom-dex__msg--loading span {
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+.rotom-dex__msg--loading span:nth-child(1) { animation-delay: -0.32s; }
+.rotom-dex__msg--loading span:nth-child(2) { animation-delay: -0.16s; }
+
+.rotom-dex__input-area {
+  padding: var(--space-3);
+  background: #ff5252;
+  display: flex;
+  gap: var(--space-2);
+}
+
+.rotom-dex__input {
+  flex: 1;
+  border: 2px solid #cc0000;
+  border-radius: 20px;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  outline: none;
+  font-weight: 600;
+}
+
+.rotom-dex__input:focus {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.rotom-dex__send-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #cc0000;
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.rotom-dex__send-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  background: #990000;
+}
+
+.rotom-dex__send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rotom-dex__send-btn svg {
+  width: 20px;
+  height: 20px;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+
+/* Auth Styles */
+.rotom-dex__auth {
+  flex: 1;
+  background: #f0f0f0;
+  padding: var(--space-6) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-4);
+}
+
+.rotom-dex__auth-msg {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: #333;
+}
+
+.rotom-dex__auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.rotom-dex__auth-btn {
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  padding: var(--space-2) var(--space-4);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.rotom-dex__auth-btn:hover {
+  background: #2563eb;
+}
+
+.rotom-dex__auth-link {
+  font-size: var(--text-sm);
+  color: #ff5252;
+  text-decoration: underline;
+  margin-top: var(--space-2);
+}

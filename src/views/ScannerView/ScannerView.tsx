@@ -1,61 +1,27 @@
 import { memo, useEffect, useCallback, useRef, useState } from 'react';
 import { useCamera } from '@/hooks/useCamera';
 import { usePokemonContext } from '@/contexts/PokemonContext';
+import { identifyPokemonFromImage } from '@/services/geminiService';
+import { useApiKey } from '@/hooks/useApiKey';
 import es from '@/i18n/es';
 import './ScannerView.css';
 
 type ScanState = 'idle' | 'analyzing' | 'not-found' | 'found';
 
-/**
- * analyzeFramePixels — Simulador de IA y análisis de píxeles reales.
- * Toma el canvas congelado, calcula el brillo general para descartar imágenes negras/oscuras,
- * y luego simula un resultado de IA buscando un Pokémon.
- */
-async function analyzeFramePixels(canvas: HTMLCanvasElement): Promise<string | null> {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return resolve(null);
-      
-      const width = canvas.width;
-      const height = canvas.height;
-      if (width === 0 || height === 0) return resolve(null);
-
-      const imageData = ctx.getImageData(0, 0, width, height);
-      const data = imageData.data;
-      
-      let totalBrightness = 0;
-      let pixelCount = 0;
-      
-      for (let i = 0; i < data.length; i += 16) {
-        const r = data[i];
-        const g = data[i + 1];
-        const b = data[i + 2];
-        const brightness = (0.299 * r + 0.587 * g + 0.114 * b);
-        totalBrightness += brightness;
-        pixelCount++;
-      }
-      
-      const avgBrightness = totalBrightness / pixelCount;
-      
-      // Si la imagen es casi negra (ej. cámara tapada o habitación oscura), fallar.
-      if (avgBrightness < 20) {
-        return resolve(null);
-      }
-      
-      // Simular un modelo de IA encontrando algo en una imagen válida
-      const mockPool = ['pikachu', 'bulbasaur', 'charmander', 'squirtle', 'eevee', 'gengar', 'snorlax', 'mewtwo'];
-      const randomMatch = mockPool[Math.floor(Math.random() * mockPool.length)];
-      resolve(randomMatch);
-    }, 1500); // 1.5s de análisis visual
-  });
-}
-
 const ScannerView = memo(function ScannerView() {
   const { videoRef, status, errorMessage, startCamera, stopCamera } = useCamera();
   const { openDetail } = usePokemonContext();
+  const { apiKey, setApiKey } = useApiKey();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [scanState, setScanState] = useState<ScanState>('idle');
+  const [keyInput, setKeyInput] = useState('');
+
+  const handleSaveKey = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (keyInput.trim()) {
+      setApiKey(keyInput.trim());
+    }
+  };
 
   useEffect(() => {
     startCamera();
@@ -80,7 +46,8 @@ const ScannerView = memo(function ScannerView() {
     
     setScanState('analyzing');
     
-    analyzeFramePixels(canvas).then((result) => {
+    // Call Gemini API to identify Pokemon
+    identifyPokemonFromImage(apiKey, canvas).then((result) => {
       if (result) {
         setScanState('found');
         openDetail(result);
@@ -145,8 +112,32 @@ const ScannerView = memo(function ScannerView() {
           {scanState === 'analyzing' && <div className="scanner-view__scan-line" />}
         </div>
         
+        {/* Auth Overlay (If no API Key) */}
+        {!apiKey && (
+          <div className="scanner-view__status-overlay scanner-view__status-overlay--error" style={{ background: 'rgba(0,0,0,0.85)' }}>
+            <div className="scanner-view__status-content" style={{ color: 'white', maxWidth: '300px' }}>
+              <span className="scanner-view__status-icon" aria-hidden="true">🔑</span>
+              <p className="scanner-view__status-text" style={{ color: 'white' }}>¡Se necesita una API Key!</p>
+              <p className="scanner-view__status-hint">Para usar el escáner con Inteligencia Artificial, configura tu clave gratuita de Google AI Studio.</p>
+              <form onSubmit={handleSaveKey} style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px', width: '100%' }}>
+                <input 
+                  type="password" 
+                  placeholder="Pega tu API Key aquí" 
+                  value={keyInput}
+                  onChange={e => setKeyInput(e.target.value)}
+                  style={{ padding: '10px', borderRadius: '12px', border: '2px solid #3b82f6', outline: 'none', textAlign: 'center' }}
+                />
+                <button type="submit" className="btn btn--primary">Guardar Clave</button>
+              </form>
+              <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" style={{ color: '#ff5252', textDecoration: 'underline', marginTop: '12px', fontSize: '14px' }}>
+                Obtener clave gratuita aquí
+              </a>
+            </div>
+          </div>
+        )}
+
         {/* Capture Button */}
-        {status === 'active' && scanState === 'idle' && (
+        {status === 'active' && scanState === 'idle' && apiKey && (
            <div className="scanner-view__capture-overlay">
              <button className="scanner-view__capture-btn" onClick={handleCapture} aria-label="Escanear">
                 <div className="scanner-view__capture-btn-inner" />
@@ -155,7 +146,7 @@ const ScannerView = memo(function ScannerView() {
         )}
         
         {/* Not Found Error */}
-        {scanState === 'not-found' && (
+        {scanState === 'not-found' && apiKey && (
           <div className="scanner-view__status-overlay scanner-view__status-overlay--error">
              <div className="scanner-view__status-content">
                <span className="scanner-view__status-icon" aria-hidden="true">❌</span>
@@ -167,7 +158,7 @@ const ScannerView = memo(function ScannerView() {
         )}
 
         {/* Status overlay */}
-        {status !== 'active' && (
+        {status !== 'active' && apiKey && (
           <div className="scanner-view__status-overlay">
             {status === 'requesting' && (
               <div className="scanner-view__status-content">
