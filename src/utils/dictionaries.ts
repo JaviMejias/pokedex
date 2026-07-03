@@ -1,0 +1,100 @@
+import { PokemonTypeName } from '@/types/pokemon';
+
+export const TYPE_NAMES: Record<string, string> = {
+  normal: 'Normal',
+  fire: 'Fuego',
+  water: 'Agua',
+  electric: 'Eléctrico',
+  grass: 'Planta',
+  ice: 'Hielo',
+  fighting: 'Lucha',
+  poison: 'Veneno',
+  ground: 'Tierra',
+  flying: 'Volador',
+  psychic: 'Psíquico',
+  bug: 'Bicho',
+  rock: 'Roca',
+  ghost: 'Fantasma',
+  dragon: 'Dragón',
+  dark: 'Siniestro',
+  steel: 'Acero',
+  fairy: 'Hada',
+};
+
+export const STAT_NAMES: Record<string, string> = {
+  hp: 'PS',
+  attack: 'Ataque',
+  defense: 'Defensa',
+  'special-attack': 'At. Esp.',
+  'special-defense': 'Def. Esp.',
+  speed: 'Velocidad',
+};
+
+export const GENERATION_NAMES: Record<string, string> = {
+  'generation-i': 'Generación I',
+  'generation-ii': 'Generación II',
+  'generation-iii': 'Generación III',
+  'generation-iv': 'Generación IV',
+  'generation-v': 'Generación V',
+  'generation-vi': 'Generación VI',
+  'generation-vii': 'Generación VII',
+  'generation-viii': 'Generación VIII',
+  'generation-ix': 'Generación IX',
+};
+
+export const VERSION_NAMES: Record<string, string> = {
+  'red': 'Rojo',
+  'blue': 'Azul',
+  'yellow': 'Amarillo',
+  'gold': 'Oro',
+  'silver': 'Plata',
+  'crystal': 'Cristal',
+  'ruby': 'Rubí',
+  'sapphire': 'Zafiro',
+  'emerald': 'Esmeralda',
+  'firered': 'Rojo Fuego',
+  'leafgreen': 'Verde Hoja',
+  'diamond': 'Diamante',
+  'pearl': 'Perla',
+  'platinum': 'Platino',
+  'heartgold': 'Oro HeartGold',
+  'soulsilver': 'Plata SoulSilver',
+  'black': 'Negro',
+  'white': 'Blanco',
+  'black-2': 'Negro 2',
+  'white-2': 'Blanco 2',
+  'x': 'X',
+  'y': 'Y',
+  'omega-ruby': 'Rubí Omega',
+  'alpha-sapphire': 'Zafiro Alfa',
+  'sun': 'Sol',
+  'moon': 'Luna',
+  'ultra-sun': 'Ultrasol',
+  'ultra-moon': 'Ultraluna',
+  'sword': 'Espada',
+  'shield': 'Escudo',
+  'scarlet': 'Escarlata',
+  'violet': 'Púrpura',
+};
+
+export const TRIGGER_NAMES: Record<string, string> = {
+  'level-up': 'Nivel',
+  'use-item': 'Objeto',
+  'trade': 'Intercambio',
+  'shed': 'Despojo',
+  'spin': 'Girar',
+  'tower-of-darkness': 'Torre Oscura',
+  'tower-of-waters': 'Torre del Agua',
+  'three-critical-hits': 'Tres golpes críticos',
+  'take-damage': 'Recibir daño',
+  'other': 'Otro',
+  'agile-style-move': 'Movimiento Ágil',
+  'strong-style-move': 'Movimiento Fuerte',
+  'recoil-damage': 'Daño de retroceso',
+};
+
+export const ALL_TYPES: PokemonTypeName[] = [
+  'normal', 'fire', 'water', 'electric', 'grass', 'ice',
+  'fighting', 'poison', 'ground', 'flying', 'psychic', 'bug',
+  'rock', 'ghost', 'dragon', 'dark', 'steel', 'fairy',
+];

@@ -1,0 +1,136 @@
+/* ============================================================
+   DESIGN TOKENS — Pokédex Pro
+   ============================================================ */
+
+:root {
+  /* Brand Colors */
+  --color-brand-primary: #CC0000;
+  --color-brand-secondary: #FF1A1A;
+  --color-brand-accent: #FFB800;
+  --color-brand-neon: #00FF41;
+  --color-brand-neon-dim: #00CC33;
+
+  /* Dark Theme (default) */
+  --color-bg-base: #0A0A0F;
+  --color-bg-surface: #12121A;
+  --color-bg-elevated: #1A1A28;
+  --color-bg-overlay: rgba(10, 10, 15, 0.95);
+  --color-bg-glass: rgba(26, 26, 40, 0.7);
+  --color-bg-card: #14141E;
+
+  --color-text-primary: #F0F0F8;
+  --color-text-secondary: #9090B0;
+  --color-text-muted: #5A5A7A;
+  --color-text-accent: #FFB800;
+  --color-text-neon: #00FF41;
+
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-active: rgba(204, 0, 0, 0.6);
+  --color-border-neon: rgba(0, 255, 65, 0.3);
+
+  --color-danger: #FF4444;
+  --color-success: #00C853;
+  --color-warning: #FFB800;
+  --color-info: #448AFF;
+
+  /* Gradients */
+  --gradient-brand: linear-gradient(135deg, #CC0000 0%, #990000 100%);
+  --gradient-neon: linear-gradient(135deg, #00FF41 0%, #00CC33 100%);
+  --gradient-surface: linear-gradient(180deg, #1A1A28 0%, #12121A 100%);
+  --gradient-card-hover: linear-gradient(135deg, rgba(204, 0, 0, 0.1) 0%, rgba(255, 184, 0, 0.05) 100%);
+  --gradient-scanline: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.05) 50%);
+  --gradient-hero: radial-gradient(ellipse at 50% 0%, rgba(204, 0, 0, 0.15) 0%, transparent 70%);
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.7);
+  --shadow-neon: 0 0 20px rgba(0, 255, 65, 0.4);
+  --shadow-brand: 0 0 24px rgba(204, 0, 0, 0.5);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  /* Spacing */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font-display: 'Orbitron', 'Courier New', monospace;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+
+  --text-xs: 0.625rem;
+  --text-sm: 0.75rem;
+  --text-base: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+
+  /* Transitions */
+  --transition-fast: 120ms ease;
+  --transition-base: 200ms ease;
+  --transition-slow: 350ms ease;
+  --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Z-index */
+  --z-base: 1;
+  --z-overlay: 100;
+  --z-nav: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+  --z-top: 500;
+
+  /* Layout */
+  --bottom-nav-height: 72px;
+  --header-height: 60px;
+  --max-width: 1200px;
+  --card-min-width: 150px;
+}
+
+/* Light Theme */
+[data-theme='light'] {
+  --color-bg-base: #F5F5FA;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-elevated: #FAFAFA;
+  --color-bg-overlay: rgba(245, 245, 250, 0.97);
+  --color-bg-glass: rgba(255, 255, 255, 0.85);
+  --color-bg-card: #FFFFFF;
+
+  --color-text-primary: #0F0F1A;
+  --color-text-secondary: #444466;
+  --color-text-muted: #8888AA;
+  --color-text-accent: #CC0000;
+  --color-text-neon: #007A20;
+
+  --color-border: rgba(0, 0, 0, 0.1);
+  --color-border-active: rgba(204, 0, 0, 0.4);
+  --color-border-neon: rgba(0, 122, 32, 0.2);
+
+  --gradient-surface: linear-gradient(180deg, #FAFAFA 0%, #F0F0F8 100%);
+  --gradient-card-hover: linear-gradient(135deg, rgba(204, 0, 0, 0.05) 0%, rgba(255, 184, 0, 0.03) 100%);
+  --gradient-hero: radial-gradient(ellipse at 50% 0%, rgba(204, 0, 0, 0.08) 0%, transparent 70%);
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.15);
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}

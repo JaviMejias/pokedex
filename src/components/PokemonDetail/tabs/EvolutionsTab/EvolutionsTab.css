@@ -1,0 +1,119 @@
+.evolutions-tab {
+  animation: fadeIn var(--transition-base) ease;
+}
+
+.evolutions-tab--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.evolutions-tab__no-evo {
+  color: var(--color-text-muted);
+  font-style: italic;
+  text-align: center;
+}
+
+.evolutions-tab__chain {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-4) 0;
+}
+
+.evolutions-tab__stage {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.evolutions-tab__arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 60px;
+}
+
+.evolutions-tab__arrow-icon {
+  font-size: 1.5rem;
+  color: var(--color-brand-primary);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.evolutions-tab__trigger {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.evolutions-tab__trigger-text {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.evolutions-tab__trigger-item {
+  font-size: var(--text-xs);
+  color: var(--color-brand-accent);
+  text-transform: capitalize;
+  text-align: center;
+}
+
+.evolutions-tab__pokemon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border: 2px solid transparent;
+  background: var(--color-bg-elevated);
+  transition: all var(--transition-base);
+  min-width: 80px;
+  cursor: pointer;
+}
+
+.evolutions-tab__pokemon:hover:not(:disabled) {
+  border-color: var(--color-border-active);
+  background: var(--gradient-card-hover), var(--color-bg-elevated);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.evolutions-tab__pokemon--current {
+  border-color: var(--color-brand-primary);
+  background: rgba(204, 0, 0, 0.08);
+  cursor: default;
+  box-shadow: 0 0 0 3px rgba(204, 0, 0, 0.15);
+}
+
+.evolutions-tab__sprite-wrapper {
+  width: 72px;
+  height: 72px;
+}
+
+.evolutions-tab__sprite {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.evolutions-tab__name {
+  font-size: var(--text-sm);
+  text-transform: capitalize;
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+.evolutions-tab__id {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
