@@ -36,16 +36,7 @@ const RotomDex = memo(function RotomDex({ pokemonName, isOpen, onClose }: RotomD
     }
   }, [messages, isOpen]);
 
-  // Si cambia el pokemon, reiniciamos el chat con un saludo nuevo
-  useEffect(() => {
-    setMessages([
-      {
-        id: Date.now().toString(),
-        role: 'model',
-        text: `¡Zzzt! Nuevo Pokémon detectado: ${pokemonName ? pokemonName.toUpperCase() : 'Ninguno'}. ¿Dudas al respecto, compañero?`
-      }
-    ]);
-  }, [pokemonName]);
+
 
   const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
