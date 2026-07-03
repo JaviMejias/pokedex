@@ -90,6 +90,21 @@ export function usePWA(): PWAState {
     }
   };
 
+  const forceReload = () => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        for (const reg of registrations) {
+          reg.unregister();
+        }
+        window.location.reload();
+      }).catch(() => {
+        window.location.reload();
+      });
+    } else {
+      window.location.reload();
+    }
+  };
+
   return {
     canInstall: !!installPrompt && !isInstalled && !installDismissed,
     isInstalled,
@@ -98,5 +113,6 @@ export function usePWA(): PWAState {
     dismissInstall,
     dismissUpdate,
     applyUpdate,
+    forceReload,
   };
 }

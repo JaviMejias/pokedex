@@ -5,6 +5,7 @@ import { ErrorState, EmptyState } from '@/components/StateComponents/StateCompon
 import TypeBadge from '@/components/TypeBadge/TypeBadge';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { useDebounce } from '@/hooks/useDebounce';
+import { usePWA } from '@/hooks/usePWA';
 import { fetchPokemon, fetchAllPokemonNames } from '@/services/pokemonService';
 import { usePokemonContext } from '@/contexts/PokemonContext';
 import type { Pokemon } from '@/types/pokemon';
@@ -16,6 +17,7 @@ type SortMode = 'id' | 'name';
 
 const ExploreView = memo(function ExploreView() {
   const { openDetail, history } = usePokemonContext();
+  const { forceReload } = usePWA();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [sortMode, setSortMode] = useState<SortMode>('id');
@@ -127,14 +129,25 @@ const ExploreView = memo(function ExploreView() {
             <div className="pokedex-device__led pokedex-device__led--green"></div>
           </div>
         </div>
-        <button 
-          className="pokedex-device__skin-toggle" 
-          onClick={() => setSkin(s => s === 'retro' ? 'modern' : 'retro')}
-          title="Cambiar diseño"
-          type="button"
-        >
-          {skin === 'retro' ? '📱' : '🕹️'}
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button 
+            className="pokedex-device__skin-toggle" 
+            onClick={() => forceReload()}
+            title="Recargar Aplicación (Solucionar caché)"
+            type="button"
+            style={{ fontSize: '18px' }}
+          >
+            🔄
+          </button>
+          <button 
+            className="pokedex-device__skin-toggle" 
+            onClick={() => setSkin(s => s === 'retro' ? 'modern' : 'retro')}
+            title="Cambiar diseño"
+            type="button"
+          >
+            {skin === 'retro' ? '📱' : '🕹️'}
+          </button>
+        </div>
       </div>
 
       <div className="pokedex-device__screen-wrapper">
