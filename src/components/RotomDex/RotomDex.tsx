@@ -63,8 +63,9 @@ const RotomDex = memo(function RotomDex({ pokemonName, isOpen, onClose }: RotomD
 
     setMessages(prev => [...prev, newUserMsg]);
 
-    // Format history for Gemini API
-    const history = messages.map(m => ({
+    // Format history for Gemini API (must start with 'user')
+    // Since our first message is always a hardcoded 'model' greeting, we skip it.
+    const history = messages.slice(1).map(m => ({
       role: m.role,
       parts: [{ text: m.text }]
     }));
