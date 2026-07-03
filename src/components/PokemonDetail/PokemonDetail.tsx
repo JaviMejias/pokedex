@@ -131,9 +131,13 @@ const PokemonDetail = memo(function PokemonDetail() {
         : selectedPokemon.sprites.versions?.['generation-v']?.['black-white']?.animated?.front_default) ?? null
     : null;
 
-  const mainImageSrc = (animatedSprite
-    ?? (isShiny ? selectedPokemon?.sprites.other['official-artwork'].front_shiny : selectedPokemon?.sprites.other['official-artwork'].front_default)
-    ?? (isShiny ? selectedPokemon?.sprites.front_shiny : (selectedPokemon ? getOfficialArtwork(selectedPokemon.id) : null))) ?? null;
+  let mainImageSrc: string | null = null;
+  if (selectedPokemon) {
+    mainImageSrc = animatedSprite
+      ?? (isShiny ? selectedPokemon.sprites.other['official-artwork'].front_shiny : selectedPokemon.sprites.other['official-artwork'].front_default)
+      ?? (isShiny ? selectedPokemon.sprites.front_shiny : getOfficialArtwork(selectedPokemon.id))
+      ?? null;
+  }
 
   return (
     <div
