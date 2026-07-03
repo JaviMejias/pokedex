@@ -56,7 +56,7 @@ const ScannerView = memo(function ScannerView() {
         setScanState('not-found');
       }
     });
-  }, [videoRef, openDetail]);
+  }, [videoRef, openDetail, apiKey]);
   
   const handleReset = useCallback(() => {
     setScanState('idle');
