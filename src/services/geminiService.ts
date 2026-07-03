@@ -6,6 +6,35 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
  * @param canvas El canvas con el fotograma capturado
  * @returns El nombre del Pokémon en minúsculas, o null si no se detecta ninguno
  */
+let cachedModelName: string | null = null;
+
+async function getBestAvailableModel(apiKey: string): Promise<string> {
+  if (cachedModelName) return cachedModelName;
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+    const data = await response.json();
+    if (data && data.models) {
+      console.log("Available models:", data.models.map((m: any) => m.name));
+      const models = data.models;
+      // Prefer 1.5 flash, then 1.5 pro, then anything with gemini that supports generateContent
+      const flash = models.find((m: any) => m.name.includes('1.5-flash') && m.supportedGenerationMethods?.includes('generateContent'));
+      const pro = models.find((m: any) => m.name.includes('1.5-pro') && m.supportedGenerationMethods?.includes('generateContent'));
+      const proVision = models.find((m: any) => m.name.includes('pro-vision') && m.supportedGenerationMethods?.includes('generateContent'));
+      const anyGemini = models.find((m: any) => m.name.includes('gemini') && m.supportedGenerationMethods?.includes('generateContent'));
+      
+      const selected = flash || pro || proVision || anyGemini;
+      if (selected) {
+        cachedModelName = selected.name.replace('models/', '');
+        console.log("Auto-selected model:", cachedModelName);
+        return cachedModelName!;
+      }
+    }
+  } catch (e) {
+    console.error("Failed to fetch models list", e);
+  }
+  return 'gemini-1.5-flash'; // Fallback
+}
+
 export async function identifyPokemonFromImage(apiKey: string, canvas: HTMLCanvasElement): Promise<string | null> {
   try {
     if (!apiKey) {
@@ -13,6 +42,7 @@ export async function identifyPokemonFromImage(apiKey: string, canvas: HTMLCanva
       return null;
     }
 
+    const resolvedModelName = await getBestAvailableModel(apiKey);
     const genAI = new GoogleGenerativeAI(apiKey);
 
     // Convertir canvas a base64
@@ -20,7 +50,7 @@ export async function identifyPokemonFromImage(apiKey: string, canvas: HTMLCanva
     // Eliminar el prefijo data:image/jpeg;base64,
     const base64Data = dataUrl.split(',')[1];
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+    const model = genAI.getGenerativeModel({ model: resolvedModelName });
     
     const prompt = `
       You are a Pokedex scanner. I am showing you an image of a real-world object, drawing, toy, or screen.
@@ -73,10 +103,11 @@ export async function askRotomDex(
       return "¡Zzzt! No has configurado tu clave API. ¡Necesito energía para funcionar, compañero!";
     }
 
+    const resolvedModelName = await getBestAvailableModel(apiKey);
     const genAI = new GoogleGenerativeAI(apiKey);
 
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-pro',
+      model: resolvedModelName,
       systemInstruction: `
         Eres la Rotom Dex, una IA enérgica, entusiasta y muy conocedora del mundo Pokémon. 
         Hablas en español. Llama al usuario "compañero" o "bzzzt". Usa onomatopeyas eléctricas como ¡Zzzt! o bzzz.
