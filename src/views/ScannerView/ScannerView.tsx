@@ -66,10 +66,9 @@ const ScannerView = memo(function ScannerView() {
   }, [startCamera, stopCamera]);
 
   const handleCapture = useCallback(() => {
-    if (!videoRef.current || !canvasRef.current) return;
-    
     const video = videoRef.current;
     const canvas = canvasRef.current;
+    if (!video || !canvas) return;
     
     canvas.width = video.videoWidth || 640;
     canvas.height = video.videoHeight || 480;
