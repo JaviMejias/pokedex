@@ -20,7 +20,7 @@ export async function identifyPokemonFromImage(apiKey: string, canvas: HTMLCanva
     // Eliminar el prefijo data:image/jpeg;base64,
     const base64Data = dataUrl.split(',')[1];
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
     
     const prompt = `
       You are a Pokedex scanner. I am showing you an image of a real-world object, drawing, toy, or screen.
@@ -76,7 +76,7 @@ export async function askRotomDex(
     const genAI = new GoogleGenerativeAI(apiKey);
 
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-flash',
+      model: 'gemini-1.5-flash-latest',
       systemInstruction: `
         Eres la Rotom Dex, una IA enérgica, entusiasta y muy conocedora del mundo Pokémon. 
         Hablas en español. Llama al usuario "compañero" o "bzzzt". Usa onomatopeyas eléctricas como ¡Zzzt! o bzzz.
