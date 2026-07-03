@@ -118,10 +118,7 @@ export async function askRotomDex(
     });
 
     const chat = model.startChat({
-      history: history,
-      generationConfig: {
-        maxOutputTokens: 250,
-      }
+      history: history
     });
 
     const result = await chat.sendMessage(message);
