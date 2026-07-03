@@ -11,7 +11,6 @@ import BasicTab from './tabs/BasicTab/BasicTab';
 import StatsTab from './tabs/StatsTab/StatsTab';
 import CombatTab from './tabs/CombatTab/CombatTab';
 import EvolutionsTab from './tabs/EvolutionsTab/EvolutionsTab';
-import RotomDex from '@/components/RotomDex/RotomDex';
 import { ErrorState, LoadingState } from '@/components/StateComponents/StateComponents';
 import { sharePokemon } from '@/services/shareService';
 import { formatPokemonId, getOfficialArtwork } from '@/utils/formatters';
@@ -47,7 +46,6 @@ const PokemonDetail = memo(function PokemonDetail() {
   const [activeTab, setActiveTab] = useState<TabId>('basic');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isShiny, setIsShiny] = useState(false);
-  const [isRotomOpen, setIsRotomOpen] = useState(false);
   const [species, setSpecies] = useState<PokemonSpecies | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -218,20 +216,6 @@ const PokemonDetail = memo(function PokemonDetail() {
                   <line x1="12" y1="2" x2="12" y2="15" />
                 </svg>
               </button>
-              <button
-                className="pokemon-detail__action-btn"
-                onClick={() => setIsRotomOpen(true)}
-                aria-label="Preguntar a Rotom Dex"
-                title="Rotom Dex"
-                type="button"
-                style={{ color: '#ff5252' }}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" />
-                  <circle cx="12" cy="12" r="3" />
-                  <path d="M12 6v2m0 8v2M6 12h2m8 0h2" />
-                </svg>
-              </button>
             </div>
           )}
         </div>
@@ -322,11 +306,6 @@ const PokemonDetail = memo(function PokemonDetail() {
         </div>
       </div>
       
-      <RotomDex 
-        pokemonName={selectedPokemon?.name} 
-        isOpen={isRotomOpen} 
-        onClose={() => setIsRotomOpen(false)} 
-      />
     </div>
   );
 });

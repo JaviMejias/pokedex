@@ -10,6 +10,8 @@ import { LoadingState } from '@/components/StateComponents/StateComponents';
 import { usePWA } from '@/hooks/usePWA';
 import type { NavigationTab } from '@/types/pokemon';
 import es from '@/i18n/es';
+import RotomDex from '@/components/RotomDex/RotomDex';
+import { usePokemonContext } from '@/contexts/PokemonContext';
 import './AppShell.css';
 
 const PWABanners = memo(function PWABanners() {
@@ -45,6 +47,8 @@ const PWABanners = memo(function PWABanners() {
 
 const AppShell = memo(function AppShell() {
   const [activeTab, setActiveTab] = useState<NavigationTab>('explore');
+  const [isRotomOpen, setIsRotomOpen] = useState(false);
+  const { selectedPokemon } = usePokemonContext();
 
   const handleTabChange = useCallback((tab: NavigationTab) => {
     setActiveTab(tab);
@@ -66,6 +70,29 @@ const AppShell = memo(function AppShell() {
       </main>
 
       <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
+
+      {/* Global Floating Action Button for Rotom Dex */}
+      {!isRotomOpen && (
+        <button 
+          className="app-shell__rotom-fab"
+          onClick={() => setIsRotomOpen(true)}
+          aria-label="Abrir Rotom Dex"
+          title="Rotom Dex"
+        >
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" stroke="white" strokeWidth="1.5">
+            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" />
+            <circle cx="12" cy="12" r="3" />
+            <path d="M12 6v2m0 8v2M6 12h2m8 0h2" />
+          </svg>
+        </button>
+      )}
+
+      {/* Global Rotom Dex */}
+      <RotomDex 
+        pokemonName={selectedPokemon?.name} 
+        isOpen={isRotomOpen} 
+        onClose={() => setIsRotomOpen(false)} 
+      />
 
       {/* Modal — always mounted to preserve state */}
       <PokemonDetail />
