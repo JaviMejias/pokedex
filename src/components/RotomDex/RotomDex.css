@@ -3,7 +3,7 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
-  z-index: 200;
+  z-index: 2000;
   display: flex;
   justify-content: flex-end;
   padding: var(--space-4);
@@ -258,4 +258,53 @@
   color: #ff5252;
   text-decoration: underline;
   margin-top: var(--space-2);
+}
+
+/* Dark Mode Styles */
+:root[data-theme='dark'] .rotom-dex {
+  background: var(--color-bg-elevated);
+  border-color: var(--color-bg-surface);
+}
+
+:root[data-theme='dark'] .rotom-dex__header {
+  background: var(--color-bg-surface);
+  border-bottom-color: var(--color-border);
+}
+
+:root[data-theme='dark'] .rotom-dex__input-area {
+  background: var(--color-bg-surface);
+}
+
+:root[data-theme='dark'] .rotom-dex__chat,
+:root[data-theme='dark'] .rotom-dex__auth {
+  background: var(--color-bg-base);
+  border-bottom-color: var(--color-border);
+}
+
+:root[data-theme='dark'] .rotom-dex__input {
+  background: var(--color-bg-base);
+  color: var(--text-primary);
+  border-color: var(--color-border);
+}
+
+:root[data-theme='dark'] .rotom-dex__input:focus {
+  border-color: var(--color-brand-primary);
+}
+
+:root[data-theme='dark'] .rotom-dex__send-btn {
+  background: var(--color-brand-primary);
+}
+
+:root[data-theme='dark'] .rotom-dex__send-btn:hover:not(:disabled) {
+  background: var(--color-brand-secondary);
+}
+
+:root[data-theme='dark'] .rotom-dex__msg--model {
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+:root[data-theme='dark'] .rotom-dex__auth-msg {
+  color: var(--color-text-primary);
 }

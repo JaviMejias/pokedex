@@ -36,7 +36,6 @@ export function useInfiniteScroll(typeFilters: string[] = []): UseInfiniteScroll
       if (typeFilters.length > 0) {
         const typeDatas = await Promise.all(typeFilters.map(t => fetchTypeData(t)));
         
-        // Lógica AND (intersección) si hay varios filtros, para buscar Pokémon que tengan AMBOS tipos
         let validNames = new Set(typeDatas[0].pokemon.map(p => p.pokemon.name));
         const idMap = new Map<string, number>();
         
@@ -52,6 +51,10 @@ export function useInfiniteScroll(typeFilters: string[] = []): UseInfiniteScroll
           for (const name of validNames) {
             if (!nextSet.has(name)) validNames.delete(name);
           }
+        }
+
+        for (const name of validNames) {
+          if ((idMap.get(name) || 0) >= 10000) validNames.delete(name);
         }
 
         const sortedNames = Array.from(validNames).sort((a, b) => (idMap.get(a) || 0) - (idMap.get(b) || 0));

@@ -33,9 +33,9 @@ async function getCached<T>(store: string, key: string, fetcher: () => Promise<T
 }
 
 export async function fetchPokemonList(offset: number, limit = PAGE_SIZE): Promise<PokemonListResponse> {
-  const key = `list-${offset}-${limit}`;
+  const key = `list-species-${offset}-${limit}`;
   return getCached(IDB_CONFIG.STORES.POKEMON, key, () =>
-    fetchWithTimeout<PokemonListResponse>(`${POKEAPI_BASE_URL}/pokemon?limit=${limit}&offset=${offset}`)
+    fetchWithTimeout<PokemonListResponse>(`${POKEAPI_BASE_URL}/pokemon-species?limit=${limit}&offset=${offset}`)
   );
 }
 
@@ -76,10 +76,13 @@ export async function searchPokemonByName(query: string): Promise<Pokemon | null
 }
 
 export async function fetchAllPokemonNames(): Promise<Array<{ name: string; url: string }>> {
-  const key = 'all-names';
+  const key = 'all-names-base';
   return getCached(IDB_CONFIG.STORES.POKEMON, key, () =>
     fetchWithTimeout<PokemonListResponse>(`${POKEAPI_BASE_URL}/pokemon?limit=10000&offset=0`)
-      .then(r => r.results)
+      .then(r => r.results.filter(p => {
+        const id = parseInt(p.url.replace(/\/$/, '').split('/').pop() || '0', 10);
+        return id > 0 && id < 10000;
+      }))
   );
 }
 

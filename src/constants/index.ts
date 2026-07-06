@@ -12,6 +12,8 @@ export const STORAGE_KEYS = {
   THEME: 'pokedex-pro:theme',
   AUDIO_MUTED: 'pokedex-pro:audio-muted',
   TEAM: 'pokedex-pro:team',
+  SKIN: 'pokedex-pro:skin',
+  YOUTUBE_URL: 'pokedex-pro:youtube-url',
 } as const;
 
 export const IDB_CONFIG = {

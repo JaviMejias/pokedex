@@ -18,8 +18,13 @@ const PokemonImage = memo(function PokemonImage({ src, alt, id, className }: Pok
   }, [src, id]);
 
   const handleError = useCallback(() => {
-    if (imgSrc !== getOfficialArtwork(id)) {
-      setImgSrc(getOfficialArtwork(id));
+    const official = getOfficialArtwork(id);
+    const standard = `https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/sprites/pokemon/${id}.png`;
+    
+    if (imgSrc !== official && imgSrc !== standard) {
+      setImgSrc(official);
+    } else if (imgSrc === official) {
+      setImgSrc(standard);
     } else {
       setHasError(true);
     }

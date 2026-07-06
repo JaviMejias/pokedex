@@ -23,6 +23,7 @@ const es = {
       stats: 'Estadísticas',
       combat: 'Combate',
       evolutions: 'Evoluciones',
+      forms: 'Formas',
     },
     height: 'Altura',
     weight: 'Peso',

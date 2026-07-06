@@ -1,0 +1,83 @@
+.forms-tab {
+  animation: fadeIn var(--transition-base) ease;
+}
+
+.forms-tab--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+  color: var(--color-text-muted);
+  text-align: center;
+  font-family: var(--font-body);
+}
+
+.forms-tab__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--space-3);
+  padding-bottom: var(--space-4);
+}
+
+.forms-tab__btn {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.forms-tab__btn:hover {
+  border-color: var(--color-border-active);
+  transform: translateY(-2px);
+}
+
+.forms-tab__btn--active {
+  border-color: var(--color-brand-primary);
+  background: var(--color-bg-overlay);
+  box-shadow: 0 0 0 1px var(--color-brand-primary);
+}
+
+.forms-tab__img-container {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.forms-tab__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.forms-tab__name {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  color: var(--color-text-primary);
+  text-transform: capitalize;
+  text-align: center;
+  word-break: break-word;
+  line-height: 1.2;
+}
+
+.forms-tab__default-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: var(--color-brand-primary);
+  color: white;
+  font-size: 0.6rem;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+}

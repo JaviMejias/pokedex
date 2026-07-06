@@ -1,6 +1,6 @@
-const CACHE_NAME = 'pokedex-pro-v2';
-const API_CACHE_NAME = 'pokedex-api-v2';
-const IMAGE_CACHE_NAME = 'pokedex-images-v2';
+const CACHE_NAME = 'pokedex-pro-v3';
+const API_CACHE_NAME = 'pokedex-api-v3';
+const IMAGE_CACHE_NAME = 'pokedex-images-v3';
 
 const STATIC_ASSETS = [
   '/',
@@ -10,6 +10,7 @@ const STATIC_ASSETS = [
 
 const POKEAPI_ORIGIN = 'https://pokeapi.co';
 const SPRITE_ORIGINS = [
+  'https://cdn.jsdelivr.net',
   'https://raw.githubusercontent.com',
   'https://pokeapi.co',
 ];
@@ -40,6 +41,11 @@ self.addEventListener('fetch', (event) => {
 
   if (request.method !== 'GET') return;
   if (!url.protocol.startsWith('http')) return;
+  
+  // Bypasear archivos de desarrollo de Vite para evitar bucles de recarga con HMR
+  if (url.pathname.startsWith('/@') || url.pathname.startsWith('/node_modules/') || url.search.includes('?t=')) {
+    return;
+  }
 
   if (SPRITE_ORIGINS.some(o => url.origin === new URL(o).origin) && isImageRequest(request)) {
     event.respondWith(cacheFirst(request, IMAGE_CACHE_NAME));

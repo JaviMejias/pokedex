@@ -5,9 +5,10 @@ import { ErrorState, EmptyState } from '@/components/StateComponents/StateCompon
 import TypeBadge from '@/components/TypeBadge/TypeBadge';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { useDebounce } from '@/hooks/useDebounce';
-import { usePWA } from '@/hooks/usePWA';
 import { fetchPokemon, fetchAllPokemonNames } from '@/services/pokemonService';
 import { usePokemonContext } from '@/contexts/PokemonContext';
+import { useFavorites } from '@/contexts/FavoritesContext';
+import { useSettings } from '@/contexts/SettingsContext';
 import type { Pokemon } from '@/types/pokemon';
 import { ALL_TYPES } from '@/utils/dictionaries';
 import es from '@/i18n/es';
@@ -17,14 +18,15 @@ type SortMode = 'id' | 'name';
 
 const ExploreView = memo(function ExploreView() {
   const { openDetail, history } = usePokemonContext();
-  const { forceReload } = usePWA();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [sortMode, setSortMode] = useState<SortMode>('id');
   const [searchResults, setSearchResults] = useState<Pokemon[] | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [skin, setSkin] = useState<'modern' | 'retro'>('retro');
+  const { skin } = useSettings();
+  const { favorites } = useFavorites();
+  const [showFavorites, setShowFavorites] = useState(false);
 
   const debouncedQuery = useDebounce(searchQuery, 300);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -32,6 +34,7 @@ const ExploreView = memo(function ExploreView() {
   const { pokemon, isLoading, isLoadingMore, error, loadMore, reset } = useInfiniteScroll(selectedTypes);
 
   useEffect(() => {
+    if (showFavorites) return; // Si estamos en modo favoritos, no hacer búsqueda normal
     if (!debouncedQuery.trim()) {
       setSearchResults(null);
       return;
@@ -74,7 +77,22 @@ const ExploreView = memo(function ExploreView() {
         setIsSearching(false);
       }
     })();
-  }, [debouncedQuery]);
+  }, [debouncedQuery, showFavorites]);
+
+  // Efecto para cargar y mostrar favoritos
+  useEffect(() => {
+    if (showFavorites) {
+      setIsSearching(true);
+      Promise.allSettled(favorites.map(id => fetchPokemon(id.toString())))
+        .then(results => {
+          setSearchResults(
+            results.filter((r): r is PromiseFulfilledResult<Pokemon> => r.status === 'fulfilled')
+              .map(r => r.value)
+          );
+        })
+        .finally(() => setIsSearching(false));
+    }
+  }, [showFavorites, favorites]);
 
   useEffect(() => {
     if (!sentinelRef.current || searchResults !== null) return;
@@ -110,6 +128,17 @@ const ExploreView = memo(function ExploreView() {
     setSearchQuery('');
   }, []);
 
+  const toggleFavoritesMode = () => {
+    if (!showFavorites) {
+      setSearchQuery('');
+      setSelectedTypes([]);
+      setIsFilterOpen(false);
+    } else {
+      setSearchResults(null);
+    }
+    setShowFavorites(!showFavorites);
+  };
+
   const handleRetry = useCallback(() => {
     reset();
   }, [reset]);
@@ -128,25 +157,6 @@ const ExploreView = memo(function ExploreView() {
             <div className="pokedex-device__led pokedex-device__led--yellow"></div>
             <div className="pokedex-device__led pokedex-device__led--green"></div>
           </div>
-        </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <button 
-            className="pokedex-device__skin-toggle" 
-            onClick={() => forceReload()}
-            title="Recargar Aplicación (Solucionar caché)"
-            type="button"
-            style={{ fontSize: '18px' }}
-          >
-            🔄
-          </button>
-          <button 
-            className="pokedex-device__skin-toggle" 
-            onClick={() => setSkin(s => s === 'retro' ? 'modern' : 'retro')}
-            title="Cambiar diseño"
-            type="button"
-          >
-            {skin === 'retro' ? '📱' : '🕹️'}
-          </button>
         </div>
       </div>
 
@@ -201,6 +211,17 @@ const ExploreView = memo(function ExploreView() {
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+            </svg>
+          </button>
+          <button
+            className={`explore-view__filter-btn${showFavorites ? ' explore-view__filter-btn--active explore-view__filter-btn--has-filter' : ''}`}
+            onClick={toggleFavoritesMode}
+            aria-label="Mostrar favoritos"
+            title="Mis Favoritos"
+            type="button"
+          >
+            <svg viewBox="0 0 24 24" fill={showFavorites ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
             </svg>
           </button>
         </div>

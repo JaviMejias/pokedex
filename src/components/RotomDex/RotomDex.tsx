@@ -11,11 +11,12 @@ interface Message {
 
 interface RotomDexProps {
   pokemonName?: string;
+  contextMessage?: string;
   isOpen: boolean;
   onClose: () => void;
 }
 
-const RotomDex = memo(function RotomDex({ pokemonName, isOpen, onClose }: RotomDexProps) {
+const RotomDex = memo(function RotomDex({ pokemonName, contextMessage, isOpen, onClose }: RotomDexProps) {
   const { apiKey, setApiKey } = useApiKey();
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -61,7 +62,7 @@ const RotomDex = memo(function RotomDex({ pokemonName, isOpen, onClose }: RotomD
       parts: [{ text: m.text }]
     }));
 
-    const responseText = await askRotomDex(apiKey, userText, history as any, pokemonName);
+    const responseText = await askRotomDex(apiKey, userText, history as any, pokemonName, contextMessage);
 
     const newModelMsg: Message = {
       id: (Date.now() + 1).toString(),

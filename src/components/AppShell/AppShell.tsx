@@ -1,6 +1,6 @@
 import { memo, useState, useCallback, Suspense } from 'react';
 import BottomNav from '@/components/BottomNav/BottomNav';
-import AudioPlayer from '@/components/AudioPlayer/AudioPlayer';
+import GlobalSettings from '@/components/GlobalSettings/GlobalSettings';
 import ConnectivityIndicator from '@/components/ConnectivityIndicator/ConnectivityIndicator';
 import PokemonDetail from '@/components/PokemonDetail/PokemonDetail';
 import ExploreView from '@/views/ExploreView/ExploreView';
@@ -12,6 +12,7 @@ import type { NavigationTab } from '@/types/pokemon';
 import es from '@/i18n/es';
 import RotomDex from '@/components/RotomDex/RotomDex';
 import { usePokemonContext } from '@/contexts/PokemonContext';
+import { useRotomContext } from '@/contexts/RotomContext';
 import './AppShell.css';
 
 const PWABanners = memo(function PWABanners() {
@@ -32,8 +33,7 @@ const PWABanners = memo(function PWABanners() {
       )}
       {canInstall && (
         <div className="app-shell__banner app-shell__banner--install" role="complementary">
-          <span className="app-shell__banner-text">{es.pwa.install}</span>
-          <div className="app-shell__banner-actions">
+          <div className="app-shell__banner-actions" style={{ width: '100%', justifyContent: 'center' }}>
             <button onClick={install} className="app-shell__banner-btn app-shell__banner-btn--primary" type="button">
               {es.pwa.install}
             </button>
@@ -49,6 +49,7 @@ const AppShell = memo(function AppShell() {
   const [activeTab, setActiveTab] = useState<NavigationTab>('explore');
   const [isRotomOpen, setIsRotomOpen] = useState(false);
   const { selectedPokemon } = usePokemonContext();
+  const { contextMessage } = useRotomContext();
 
   const handleTabChange = useCallback((tab: NavigationTab) => {
     setActiveTab(tab);
@@ -57,7 +58,7 @@ const AppShell = memo(function AppShell() {
 
   return (
     <div className="app-shell">
-      <AudioPlayer />
+      <GlobalSettings />
       <ConnectivityIndicator />
       <PWABanners />
 
@@ -72,7 +73,7 @@ const AppShell = memo(function AppShell() {
       <BottomNav activeTab={activeTab} onTabChange={handleTabChange} />
 
       {/* Global Floating Action Button for Rotom Dex */}
-      {!isRotomOpen && (
+      {!isRotomOpen && activeTab !== 'scanner' && (
         <button 
           className="app-shell__rotom-fab"
           onClick={() => setIsRotomOpen(true)}
@@ -89,7 +90,8 @@ const AppShell = memo(function AppShell() {
 
       {/* Global Rotom Dex */}
       <RotomDex 
-        pokemonName={selectedPokemon?.name} 
+        pokemonName={selectedPokemon?.name}
+        contextMessage={contextMessage}
         isOpen={isRotomOpen} 
         onClose={() => setIsRotomOpen(false)} 
       />

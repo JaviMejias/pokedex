@@ -26,18 +26,35 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  animation: slideInUp var(--transition-slow) cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: 0 -8px 48px rgba(0, 0, 0, 0.6);
   border: 1px solid var(--color-border);
   border-bottom: none;
   position: relative;
+  view-transition-name: detail-modal;
+}
+
+@keyframes vt-slide-up {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes vt-slide-down {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(100%); opacity: 0; }
+}
+
+::view-transition-old(detail-modal) {
+  animation: vt-slide-down 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+::view-transition-new(detail-modal) {
+  animation: vt-slide-up 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 @media (min-width: 640px) {
   .pokemon-detail {
     border-radius: var(--radius-2xl);
     border-bottom: 1px solid var(--color-border);
-    animation: fadeInScale var(--transition-slow) cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 }
 

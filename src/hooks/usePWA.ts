@@ -65,7 +65,7 @@ export function usePWA(): PWAState {
     });
 
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      window.location.reload();
+      console.log('Service Worker updated.');
     });
   }, []);
 

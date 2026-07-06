@@ -1,20 +1,22 @@
 import { memo, useState, useEffect, useMemo } from 'react';
 import type { Pokemon, PokemonSpecies } from '@/types/pokemon';
-import { fetchPokemonSpecies, fetchAbilityTranslation } from '@/services/pokemonService';
+import { fetchAbilityTranslation } from '@/services/pokemonService';
 import { formatHeight, formatWeight, capitalizeFirst, cleanFlavorText } from '@/utils/formatters';
 import { GENERATION_NAMES, VERSION_NAMES } from '@/utils/dictionaries';
+import { useSpeechSynthesis } from '@/hooks/useSpeechSynthesis';
 import es from '@/i18n/es';
 import './BasicTab.css';
 
 interface BasicTabProps {
   pokemon: Pokemon;
+  species: PokemonSpecies | null;
+  selectedVersion: string;
+  onVersionChange: (v: string) => void;
 }
 
-const BasicTab = memo(function BasicTab({ pokemon }: BasicTabProps) {
-  const [species, setSpecies] = useState<PokemonSpecies | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedVersion, setSelectedVersion] = useState('');
+const BasicTab = memo(function BasicTab({ pokemon, species, selectedVersion, onVersionChange }: BasicTabProps) {
   const [abilities, setAbilities] = useState<Array<{ name: string; isHidden: boolean }>>([]);
+  const { speak, stop, isSpeaking, isSupported } = useSpeechSynthesis();
 
   useEffect(() => {
     Promise.all(pokemon.abilities.map(async (a) => ({
@@ -23,18 +25,7 @@ const BasicTab = memo(function BasicTab({ pokemon }: BasicTabProps) {
     }))).then(setAbilities);
   }, [pokemon.abilities]);
 
-  useEffect(() => {
-    setIsLoading(true);
-    fetchPokemonSpecies(pokemon.id).then(s => {
-      setSpecies(s);
-      const spanishEntries = s.flavor_text_entries.filter(e => e.language.name === 'es');
-      if (spanishEntries.length > 0) {
-        setSelectedVersion(spanishEntries[0].version.name);
-      }
-    }).catch(() => {
-      // ignore — show without species
-    }).finally(() => setIsLoading(false));
-  }, [pokemon.id]);
+
 
   const spanishEntries = useMemo(
     () => species?.flavor_text_entries.filter(e => e.language.name === 'es') ?? [],
@@ -61,33 +52,64 @@ const BasicTab = memo(function BasicTab({ pokemon }: BasicTabProps) {
   return (
     <div className="basic-tab">
       {spanishEntries.length > 0 && (
-        <div className="basic-tab__flavor">
-          {availableVersions.length > 1 && (
-            <div className="basic-tab__version-selector">
-              <label htmlFor="version-select" className="basic-tab__label">
-                {es.detail.gameVersion}
-              </label>
-              <select
-                id="version-select"
-                className="basic-tab__select"
-                value={selectedVersion}
-                onChange={e => setSelectedVersion(e.target.value)}
-              >
-                {availableVersions.map(v => (
-                  <option key={v.version.name} value={v.version.name}>
-                    {VERSION_NAMES[v.version.name] ?? capitalizeFirst(v.version.name)}
+      <section className="basic-tab__description-section">
+        <div className="basic-tab__description-header">
+          <label htmlFor="version-select" className="basic-tab__version-label">
+            {es.detail.gameVersion}:
+          </label>
+          <div className="basic-tab__version-actions">
+            <select
+              id="version-select"
+              className="basic-tab__version-select"
+              value={selectedVersion}
+              onChange={(e) => {
+                onVersionChange(e.target.value);
+                if (isSpeaking) stop();
+              }}
+              disabled={availableVersions.length === 0}
+            >
+              {availableVersions.length > 0 ? (
+                availableVersions.map(entry => (
+                  <option key={entry.version.name} value={entry.version.name}>
+                    {VERSION_NAMES[entry.version.name as keyof typeof VERSION_NAMES] ?? capitalizeFirst(entry.version.name)}
                   </option>
-                ))}
-              </select>
-            </div>
-          )}
-          <blockquote className="basic-tab__description">
-            {currentFlavorText || es.detail.noDescription}
-          </blockquote>
+                ))
+              ) : (
+                <option value="">{es.detail.noDescription}</option>
+              )}
+            </select>
+            {isSupported && currentFlavorText && (
+              <button
+                className={`basic-tab__voice-btn ${isSpeaking ? 'is-speaking' : ''}`}
+                onClick={() => isSpeaking ? stop() : speak(currentFlavorText)}
+                aria-label={isSpeaking ? 'Detener lectura' : 'Leer descripción'}
+                title={isSpeaking ? 'Detener lectura' : 'Leer descripción'}
+                type="button"
+              >
+                {isSpeaking ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="6" y="4" width="4" height="16" />
+                    <rect x="14" y="4" width="4" height="16" />
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  </svg>
+                )}
+              </button>
+            )}
+          </div>
         </div>
+        <div className="basic-tab__description-box">
+          <p className="basic-tab__description-text">
+            {currentFlavorText || es.detail.noDescription}
+          </p>
+        </div>
+      </section>
       )}
 
-      {isLoading && !species && (
+      {!species && (
         <div className="basic-tab__skeleton-text" />
       )}
 

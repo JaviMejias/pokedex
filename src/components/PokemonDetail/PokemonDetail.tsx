@@ -11,6 +11,7 @@ import BasicTab from './tabs/BasicTab/BasicTab';
 import StatsTab from './tabs/StatsTab/StatsTab';
 import CombatTab from './tabs/CombatTab/CombatTab';
 import EvolutionsTab from './tabs/EvolutionsTab/EvolutionsTab';
+import FormsTab from './tabs/FormsTab/FormsTab';
 import { ErrorState, LoadingState } from '@/components/StateComponents/StateComponents';
 import { sharePokemon } from '@/services/shareService';
 import { formatPokemonId, getOfficialArtwork } from '@/utils/formatters';
@@ -18,13 +19,14 @@ import { TYPE_COLORS } from '@/constants';
 import es from '@/i18n/es';
 import './PokemonDetail.css';
 
-type TabId = 'basic' | 'stats' | 'combat' | 'evolutions';
+type TabId = 'basic' | 'stats' | 'combat' | 'evolutions' | 'forms';
 
 const TABS: Array<{ id: TabId; label: string }> = [
   { id: 'basic', label: es.detail.tabs.basic },
   { id: 'stats', label: es.detail.tabs.stats },
   { id: 'combat', label: es.detail.tabs.combat },
   { id: 'evolutions', label: es.detail.tabs.evolutions },
+  { id: 'forms', label: es.detail.tabs.forms },
 ];
 
 function playCry(pokemon: Pokemon): void {
@@ -39,6 +41,37 @@ function playCry(pokemon: Pokemon): void {
   }
 }
 
+const VERSION_TO_SPRITE_MAP: Record<string, [string, string]> = {
+  'red': ['generation-i', 'red-blue'],
+  'blue': ['generation-i', 'red-blue'],
+  'yellow': ['generation-i', 'yellow'],
+  'gold': ['generation-ii', 'gold'],
+  'silver': ['generation-ii', 'silver'],
+  'crystal': ['generation-ii', 'crystal'],
+  'ruby': ['generation-iii', 'ruby-sapphire'],
+  'sapphire': ['generation-iii', 'ruby-sapphire'],
+  'emerald': ['generation-iii', 'emerald'],
+  'firered': ['generation-iii', 'firered-leafgreen'],
+  'leafgreen': ['generation-iii', 'firered-leafgreen'],
+  'diamond': ['generation-iv', 'diamond-pearl'],
+  'pearl': ['generation-iv', 'diamond-pearl'],
+  'platinum': ['generation-iv', 'platinum'],
+  'heartgold': ['generation-iv', 'heartgold-soulsilver'],
+  'soulsilver': ['generation-iv', 'heartgold-soulsilver'],
+  'black': ['generation-v', 'black-white'],
+  'white': ['generation-v', 'black-white'],
+  'black-2': ['generation-v', 'black-white'],
+  'white-2': ['generation-v', 'black-white'],
+  'x': ['generation-vi', 'x-y'],
+  'y': ['generation-vi', 'x-y'],
+  'omega-ruby': ['generation-vi', 'omegaruby-alphasapphire'],
+  'alpha-sapphire': ['generation-vi', 'omegaruby-alphasapphire'],
+  'sun': ['generation-vii', 'ultra-sun-ultra-moon'],
+  'moon': ['generation-vii', 'ultra-sun-ultra-moon'],
+  'ultra-sun': ['generation-vii', 'ultra-sun-ultra-moon'],
+  'ultra-moon': ['generation-vii', 'ultra-sun-ultra-moon']
+};
+
 const PokemonDetail = memo(function PokemonDetail() {
   const { selectedPokemon, isDetailOpen, isDetailLoading, detailError, closeDetail } = usePokemonContext();
   const { isFavorite, toggleFavorite, isInTeam, addToTeam, removeFromTeam } = useFavorites();
@@ -47,19 +80,35 @@ const PokemonDetail = memo(function PokemonDetail() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isShiny, setIsShiny] = useState(false);
   const [species, setSpecies] = useState<PokemonSpecies | null>(null);
+  const [selectedVersion, setSelectedVersion] = useState<string>('');
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (selectedPokemon) {
       setIsShiny(false);
-      fetchPokemonSpecies(selectedPokemon.id)
+      setSelectedVersion('');
+      const speciesId = parseInt(selectedPokemon.species.url.split('/').filter(Boolean).pop() || '0', 10);
+      fetchPokemonSpecies(speciesId || selectedPokemon.id)
         .then(setSpecies)
         .catch(() => setSpecies(null));
     } else {
       setSpecies(null);
     }
   }, [selectedPokemon]);
+
+  useEffect(() => {
+    if (species && !selectedVersion) {
+      const spanishEntries = species.flavor_text_entries.filter(e => e.language.name === 'es');
+      if (spanishEntries.length > 0) {
+        setSelectedVersion(spanishEntries[0].version.name);
+      }
+    }
+  }, [species, selectedVersion]);
+
+  const handleVersionChange = useCallback((v: string) => {
+    setSelectedVersion(v);
+  }, []);
 
   useEffect(() => {
     if (isDetailOpen) {
@@ -125,18 +174,48 @@ const PokemonDetail = memo(function PokemonDetail() {
   const primaryType = selectedPokemon?.types[0]?.type.name ?? 'normal';
   const primaryColor = TYPE_COLORS[primaryType] ?? '#888888';
 
-  const animatedSprite = selectedPokemon
-    ? (isShiny 
-        ? selectedPokemon.sprites.versions?.['generation-v']?.['black-white']?.animated?.front_shiny
-        : selectedPokemon.sprites.versions?.['generation-v']?.['black-white']?.animated?.front_default) ?? null
-    : null;
+  let versionSprite = null;
+  if (selectedPokemon && selectedVersion && VERSION_TO_SPRITE_MAP[selectedVersion]) {
+    const [gen, game] = VERSION_TO_SPRITE_MAP[selectedVersion];
+    const gameData = (selectedPokemon.sprites.versions as any)?.[gen]?.[game];
+    if (gameData) {
+      if (game === 'black-white' && gameData.animated) {
+        versionSprite = isShiny ? gameData.animated.front_shiny : gameData.animated.front_default;
+      } else {
+        versionSprite = isShiny ? gameData.front_shiny : gameData.front_default;
+      }
+    }
+  }
+
+  if (versionSprite && typeof versionSprite === 'string') {
+    versionSprite = versionSprite.replace('raw.githubusercontent.com/PokeAPI/sprites/master', 'cdn.jsdelivr.net/gh/PokeAPI/sprites@master');
+  }
+
+
 
   let mainImageSrc: string | null = null;
   if (selectedPokemon) {
-    mainImageSrc = animatedSprite
-      ?? (isShiny ? selectedPokemon.sprites.other['official-artwork'].front_shiny : selectedPokemon.sprites.other['official-artwork'].front_default)
-      ?? (isShiny ? selectedPokemon.sprites.front_shiny : getOfficialArtwork(selectedPokemon.id))
-      ?? null;
+    // Si hay un sprite de versión (retro), úsalo si lo seleccionó.
+    // Sino, por defecto cargar el artwork oficial (que es rápido).
+    // Evitamos cargar GIFs animados por defecto porque son muy pesados.
+    
+    let rawOfficial = isShiny 
+      ? selectedPokemon.sprites.other['official-artwork'].front_shiny 
+      : selectedPokemon.sprites.other['official-artwork'].front_default;
+      
+    if (rawOfficial && typeof rawOfficial === 'string') {
+      rawOfficial = rawOfficial.replace('raw.githubusercontent.com/PokeAPI/sprites/master', 'cdn.jsdelivr.net/gh/PokeAPI/sprites@master');
+    }
+    
+    let rawFront = isShiny ? selectedPokemon.sprites.front_shiny : selectedPokemon.sprites.front_default;
+    if (rawFront && typeof rawFront === 'string') {
+      rawFront = rawFront.replace('raw.githubusercontent.com/PokeAPI/sprites/master', 'cdn.jsdelivr.net/gh/PokeAPI/sprites@master');
+    }
+
+    mainImageSrc = versionSprite
+      ?? rawOfficial
+      ?? rawFront
+      ?? getOfficialArtwork(selectedPokemon.id);
   }
 
   return (
@@ -296,10 +375,16 @@ const PokemonDetail = memo(function PokemonDetail() {
                 id={`tab-panel-${activeTab}`}
                 aria-labelledby={`tab-${activeTab}`}
               >
-                {activeTab === 'basic' && <BasicTab pokemon={selectedPokemon} />}
+                {activeTab === 'basic' && <BasicTab pokemon={selectedPokemon} species={species} selectedVersion={selectedVersion} onVersionChange={handleVersionChange} />}
                 {activeTab === 'stats' && <StatsTab pokemon={selectedPokemon} />}
                 {activeTab === 'combat' && <CombatTab pokemon={selectedPokemon} />}
                 {activeTab === 'evolutions' && <EvolutionsTab pokemon={selectedPokemon} />}
+                {activeTab === 'forms' && (
+                  <FormsTab
+                    species={species}
+                    currentName={selectedPokemon.name}
+                  />
+                )}
               </div>
             </>
           )}
