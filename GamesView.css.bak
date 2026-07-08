@@ -364,56 +364,58 @@
   border-color: var(--color-danger);
 }
 
-/* Team Builder slot grid — canonical layout */
 .team-builder__slots {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 200px));
-  justify-content: center;
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--space-3);
   margin-bottom: var(--space-4);
-  margin-top: 50px;
-  width: 100%;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 400px) {
   .team-builder__slots {
-    grid-template-columns: repeat(auto-fit, minmax(160px, 220px));
-    gap: var(--space-4);
+    grid-template-columns: repeat(6, 1fr);
   }
 }
 
-@media (max-width: 480px) {
-  .team-builder__slots {
-    grid-template-columns: repeat(auto-fit, minmax(130px, 180px));
-    margin-top: 30px;
-  }
-}
-
-/* Team Builder slot card — canonical state */
 .team-builder__slot {
-  height: 220px;
-  border-radius: var(--radius-lg);
+  aspect-ratio: 1;
+  border-radius: var(--radius-md);
   border: 2px dashed var(--color-border);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
+  gap: 4px;
   position: relative;
   transition: all var(--transition-base);
-  overflow: visible;
-  background: var(--color-bg-surface);
+  overflow: hidden;
+  background: var(--color-bg-elevated);
 }
 
-@media (max-width: 480px) {
-  .team-builder__slot {
-    height: 180px;
-  }
+.team-builder__slot--filled {
+  border-style: solid;
+  border-color: var(--color-brand-primary);
+  background: rgba(204, 0, 0, 0.05);
 }
 
-@media (min-width: 641px) {
-  /* already handled above by 220px default */
+.team-builder__slot-image {
+  width: 80%;
+  height: 60%;
+  object-fit: contain;
 }
+
+.team-builder__slot-name {
+  font-size: 0.5rem;
+  text-transform: capitalize;
+  color: var(--color-text-secondary);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  padding: 0 4px;
+}
+
 
 
 .team-builder__add {
@@ -1424,8 +1426,96 @@
   padding-top: 20px;
 }
 
-/* (legacy slot rules replaced by the canonical block above) */
+/* Better Team Builder Slots */
+.team-builder__slots {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
 
+@media (min-width: 480px) {
+  .team-builder__slots {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .team-builder__slots {
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--space-4);
+  }
+}
+
+.team-builder__slot {
+  aspect-ratio: unset;
+  height: 120px;
+  border-radius: var(--radius-lg);
+  border: 2px dashed var(--color-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  position: relative;
+  transition: all var(--transition-base);
+  overflow: hidden;
+  background: var(--color-bg-surface);
+}
+
+.team-builder__slot--filled {
+  border-style: solid;
+  border-color: var(--color-brand-primary);
+  background: linear-gradient(180deg, rgba(204, 0, 0, 0.08) 0%, rgba(204, 0, 0, 0) 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.team-builder__slot-image {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.3));
+}
+
+.team-builder__slot-name {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: capitalize;
+  color: var(--color-text-primary);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  padding: 0 8px;
+}
+
+/* Adjust remove button position on the new rectangular card */
+.team-builder__slot-remove {
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+}
+.team-builder__slot-remove svg {
+  width: 12px;
+  height: 12px;
+}
+
+@media (max-width: 480px) {
+  .team-builder__slot {
+    height: 160px;
+  }
+  .team-builder__slot-image {
+    width: 64px;
+    height: 64px;
+  }
+}
 
 /* Premium Team Slot CSS (Trading Card Style) */
 .team-builder__slot-link--premium {
@@ -1547,7 +1637,56 @@
   }
 }
 
-/* (grid/slot !important overrides removed — canonical rules live at the top of this section) */
+/* Ultimate Responsive Fix for Team Builder */
+.team-builder__slots {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+  gap: var(--space-3) !important;
+  max-width: none !important;
+  width: 100% !important;
+}
+
+@media (min-width: 768px) {
+  .team-builder__slots {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+    gap: var(--space-4) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .team-builder__slots {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
+  }
+  .team-builder__slot {
+    height: 170px !important; /* give it a bit more room */
+  }
+}
+
+
+/* Fix trading card proportions and breakout effect */
+.team-builder__slots {
+  /* Prevent cards from stretching endlessly horizontally */
+  grid-template-columns: repeat(auto-fit, minmax(140px, 200px)) !important;
+  justify-content: center !important;
+}
+
+@media (min-width: 768px) {
+  .team-builder__slots {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 220px)) !important;
+  }
+}
+
+.team-builder__slot {
+  /* Allow pokemon image to break out of the top */
+  overflow: visible !important;
+  height: 220px !important;
+}
+
+@media (max-width: 480px) {
+  .team-builder__slot {
+    height: 180px !important;
+  }
+}
 
 .team-builder__slot-bg {
   border-radius: inherit;
@@ -1557,29 +1696,24 @@
   border-radius: inherit;
 }
 
-/* Premium breakout artwork — canonical position values */
 .premium-image {
-  top: -40px;
-  width: auto;
-  height: 140px;
-  max-width: 140%;
-  max-height: none;
+  /* Use absolute pixel offset instead of % for more predictable breakout */
+  top: -40px !important;
+  width: auto !important;
+  height: 140px !important;
+  max-width: 140% !important;
+  max-height: none !important;
 }
 
 @media (max-width: 480px) {
   .premium-image {
-    top: -25px;
-    height: 110px;
+    top: -25px !important;
+    height: 110px !important;
   }
 }
 
 .team-builder__slot:hover .premium-image {
-  transform: scale(1.15) translateY(-12px);
-}
-
-/* Remove button always on top (higher than 3D hover z-index) */
-.team-builder__slot-remove {
-  z-index: 100;
+  transform: scale(1.15) translateY(-12px) !important;
 }
 
 /* ============================================================
@@ -1853,7 +1987,16 @@
 
 
 
+/* Give the breakout pokemon room to breathe without overlapping the search bar */
+.team-builder__slots {
+  margin-top: 50px !important;
+}
 
+@media (max-width: 480px) {
+  .team-builder__slots {
+    margin-top: 30px !important;
+  }
+}
 
 .adventure-analyzer__loading {
   display: flex;
@@ -1962,10 +2105,31 @@
   gap: var(--space-4);
 }
 
+.adventure-analyzer__challenge-item {
+  background: var(--color-bg-elevated);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--color-brand-primary);
+}
 
+.adventure-analyzer__challenge-item h5 {
+  margin: 0 0 var(--space-2) 0;
+  color: var(--color-text-primary);
+  font-size: var(--text-md);
+  font-family: var(--font-display);
+}
 
+.adventure-analyzer__challenge-item p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
 
-
+/* Fix remove button z-index so it can be clicked even during 3D hover */
+.team-builder__slot-remove {
+  z-index: 100 !important;
+}
 
 /* Cached tab indicator */
 .adventure-analyzer__tab-cached {
@@ -1997,396 +2161,4 @@
   line-height: 1.6;
   width: 100%;
   animation: slideUp 0.3s ease-out;
-}
-
-/* Clickable pokemon image in analysis cards */
-.adventure-analyzer__pokemon-image--clickable {
-  cursor: pointer;
-}
-
-.adventure-analyzer__pokemon-image--clickable:hover img {
-  transform: scale(1.15);
-  filter: drop-shadow(0 6px 12px rgba(204, 0, 0, 0.4));
-}
-
-/* Clickable pokemon name in analysis cards */
-.adventure-analyzer__pokemon-name--clickable {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  transition: color var(--transition-fast);
-}
-
-.adventure-analyzer__pokemon-name--clickable:hover {
-  color: var(--color-brand-primary);
-}
-
-.adventure-analyzer__pokemon-link-icon {
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-  color: var(--color-brand-primary);
-  flex-shrink: 0;
-}
-
-.adventure-analyzer__pokemon-name--clickable:hover .adventure-analyzer__pokemon-link-icon {
-  opacity: 1;
-}
-
-/* ============================================================
-   TEAM HISTORY
-   ============================================================ */
-
-.team-history {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  margin-top: var(--space-6);
-  padding-top: var(--space-6);
-  border-top: 1px solid var(--color-border);
-}
-
-.team-history__header {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.team-history__title {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--text-xl);
-  font-weight: 800;
-  color: var(--color-text-primary);
-  margin: 0;
-}
-
-.team-history__subtitle {
-  font-size: var(--text-sm);
-  color: var(--color-text-secondary);
-  margin: 0;
-}
-
-.team-history__save-form {
-  display: flex;
-  gap: var(--space-2);
-  width: 100%;
-}
-
-.team-history__input {
-  flex: 1;
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-2) var(--space-3);
-  color: var(--color-text-primary);
-  font-size: var(--text-sm);
-  font-family: var(--font-body);
-  transition: border-color var(--transition-fast);
-  min-width: 0;
-}
-
-.team-history__input:focus {
-  outline: none;
-  border-color: var(--color-brand-primary);
-}
-
-.team-history__input::placeholder {
-  color: var(--color-text-secondary);
-  opacity: 0.7;
-}
-
-.team-history__save-btn {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  background: var(--color-brand-primary);
-  color: white;
-  border: none;
-  border-radius: var(--radius-md);
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--text-sm);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.team-history__save-btn:hover:not(:disabled) {
-  background: var(--color-brand-hover, #aa0000);
-  transform: translateY(-1px);
-}
-
-.team-history__save-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.team-history__empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-6);
-  text-align: center;
-  color: var(--color-text-secondary);
-  font-size: var(--text-sm);
-  background: var(--color-bg-elevated);
-  border-radius: var(--radius-lg);
-  border: 1px dashed var(--color-border);
-}
-
-.team-history__list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.team-history__card {
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.team-history__card:hover {
-  border-color: var(--color-brand-primary);
-  box-shadow: 0 4px 12px rgba(204, 0, 0, 0.12);
-}
-
-.team-history__card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  flex-wrap: wrap;
-}
-
-.team-history__card-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.team-history__card-name {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--text-md);
-  color: var(--color-text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.team-history__card-date {
-  font-size: var(--text-xs);
-  color: var(--color-text-secondary);
-}
-
-.team-history__card-actions {
-  display: flex;
-  gap: var(--space-2);
-  flex-shrink: 0;
-}
-
-.team-history__card-btn {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: 6px 12px;
-  border: none;
-  border-radius: var(--radius-md);
-  font-family: var(--font-display);
-  font-size: var(--text-xs);
-  font-weight: 700;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.team-history__card-btn--load {
-  background: rgba(204, 0, 0, 0.12);
-  color: var(--color-brand-primary);
-}
-
-.team-history__card-btn--load:hover {
-  background: var(--color-brand-primary);
-  color: white;
-}
-
-.team-history__card-btn--delete {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--color-text-secondary);
-}
-
-.team-history__card-btn--delete:hover {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
-}
-
-.team-history__card-btn--confirm {
-  background: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
-  animation: pulse 0.8s ease infinite;
-}
-
-.team-history__card-sprites {
-  display: flex;
-  gap: var(--space-2);
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.team-history__sprite-wrapper {
-  width: 52px;
-  height: 52px;
-  border-radius: var(--radius-md);
-  background: var(--color-bg-surface);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  border: 1px solid var(--color-border);
-  flex-shrink: 0;
-}
-
-.team-history__sprite {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  transition: transform var(--transition-fast);
-}
-
-.team-history__sprite-wrapper:hover .team-history__sprite {
-  transform: scale(1.15);
-}
-
-.team-history__sprite-wrapper--empty {
-  opacity: 0.2;
-  font-size: var(--text-xl);
-  color: var(--color-text-secondary);
-}
-
-@media (max-width: 480px) {
-  .team-history__save-form {
-    flex-direction: column;
-  }
-  .team-history__card-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-
-/* Retry button in Adventure Analyzer */
-.adventure-analyzer__error {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
-  text-align: center;
-}
-
-.adventure-analyzer__retry-btn {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-top: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  background: var(--color-brand-primary);
-  color: white;
-  border: none;
-  border-radius: var(--radius-md);
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--text-sm);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.adventure-analyzer__retry-btn:hover {
-  background: var(--color-brand-hover, #aa0000);
-  transform: translateY(-1px);
-}
-
-.adventure-analyzer__retry-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
-  transform: none;
-}
-
-/* Sleeping Rotom State */
-.adventure-analyzer__sleeping-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 2rem;
-  text-align: center;
-  background: rgba(var(--color-bg-elevated-rgb), 0.5);
-  border-radius: var(--border-radius-lg);
-  border: 1px solid var(--color-border);
-  margin-top: 1rem;
-}
-
-.adventure-analyzer__sleeping-rotom {
-  position: relative;
-  color: var(--color-text-secondary);
-  margin-bottom: 1.5rem;
-  animation: sleep-breathe 4s infinite ease-in-out;
-}
-
-@keyframes sleep-breathe {
-  0%, 100% { transform: scale(1) translateY(0); }
-  50% { transform: scale(1.05) translateY(-5px); }
-}
-
-.adventure-analyzer__zzz {
-  position: absolute;
-  top: -15px;
-  right: -25px;
-  font-weight: 800;
-  font-size: 1.2rem;
-  color: #a8b2d1;
-  opacity: 0;
-  animation: zzz-float 4s infinite linear;
-}
-
-@keyframes zzz-float {
-  0% { opacity: 0; transform: translate(0, 0) scale(0.5); }
-  20% { opacity: 1; transform: translate(5px, -10px) scale(0.8); }
-  80% { opacity: 1; transform: translate(15px, -30px) scale(1.1); }
-  100% { opacity: 0; transform: translate(20px, -40px) scale(1.2); }
-}
-
-.adventure-analyzer__sleeping-title {
-  font-size: 1.5rem;
-  color: var(--color-text-primary);
-  margin-bottom: 0.5rem;
-}
-
-.adventure-analyzer__sleeping-text {
-  color: var(--color-text-secondary);
-  max-width: 400px;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-}
-
-.adventure-analyzer__sleeping-subtext {
-  font-size: 0.85rem;
-  color: var(--color-text-tertiary);
-  max-width: 400px;
 }

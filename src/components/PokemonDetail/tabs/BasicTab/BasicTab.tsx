@@ -2,7 +2,7 @@ import { memo, useState, useEffect, useMemo } from 'react';
 import type { Pokemon, PokemonSpecies } from '@/types/pokemon';
 import { fetchAbilityTranslation } from '@/services/pokemonService';
 import { formatHeight, formatWeight, capitalizeFirst, cleanFlavorText } from '@/utils/formatters';
-import { GENERATION_NAMES, VERSION_NAMES } from '@/utils/dictionaries';
+import { GENERATION_NAMES } from '@/utils/dictionaries';
 import { useSpeechSynthesis } from '@/hooks/useSpeechSynthesis';
 import es from '@/i18n/es';
 import './BasicTab.css';
@@ -10,11 +10,9 @@ import './BasicTab.css';
 interface BasicTabProps {
   pokemon: Pokemon;
   species: PokemonSpecies | null;
-  selectedVersion: string;
-  onVersionChange: (v: string) => void;
 }
 
-const BasicTab = memo(function BasicTab({ pokemon, species, selectedVersion, onVersionChange }: BasicTabProps) {
+const BasicTab = memo(function BasicTab({ pokemon, species }: BasicTabProps) {
   const [abilities, setAbilities] = useState<Array<{ name: string; isHidden: boolean }>>([]);
   const { speak, stop, isSpeaking, isSupported } = useSpeechSynthesis();
 
@@ -32,19 +30,9 @@ const BasicTab = memo(function BasicTab({ pokemon, species, selectedVersion, onV
     [species]
   );
 
-  const availableVersions = useMemo(() => {
-    const seen = new Set<string>();
-    return spanishEntries.filter(e => {
-      if (seen.has(e.version.name)) return false;
-      seen.add(e.version.name);
-      return true;
-    });
-  }, [spanishEntries]);
-
   const currentFlavorText = useMemo(() => {
-    const entry = spanishEntries.find(e => e.version.name === selectedVersion);
-    return entry ? cleanFlavorText(entry.flavor_text) : '';
-  }, [spanishEntries, selectedVersion]);
+    return spanishEntries.length > 0 ? cleanFlavorText(spanishEntries[0].flavor_text) : '';
+  }, [spanishEntries]);
 
   const spanishGenus = species?.genera.find(g => g.language.name === 'es');
   const generation = species?.generation.name ?? '';
@@ -54,30 +42,10 @@ const BasicTab = memo(function BasicTab({ pokemon, species, selectedVersion, onV
       {spanishEntries.length > 0 && (
       <section className="basic-tab__description-section">
         <div className="basic-tab__description-header">
-          <label htmlFor="version-select" className="basic-tab__version-label">
-            {es.detail.gameVersion}:
-          </label>
+          <span className="basic-tab__version-label" style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>
+            Descripción:
+          </span>
           <div className="basic-tab__version-actions">
-            <select
-              id="version-select"
-              className="basic-tab__version-select"
-              value={selectedVersion}
-              onChange={(e) => {
-                onVersionChange(e.target.value);
-                if (isSpeaking) stop();
-              }}
-              disabled={availableVersions.length === 0}
-            >
-              {availableVersions.length > 0 ? (
-                availableVersions.map(entry => (
-                  <option key={entry.version.name} value={entry.version.name}>
-                    {VERSION_NAMES[entry.version.name as keyof typeof VERSION_NAMES] ?? capitalizeFirst(entry.version.name)}
-                  </option>
-                ))
-              ) : (
-                <option value="">{es.detail.noDescription}</option>
-              )}
-            </select>
             {isSupported && currentFlavorText && (
               <button
                 className={`basic-tab__voice-btn ${isSpeaking ? 'is-speaking' : ''}`}

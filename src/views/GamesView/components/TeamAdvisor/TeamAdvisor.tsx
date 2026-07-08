@@ -5,28 +5,40 @@ import { fetchPokemon } from '@/services/pokemonService';
 import PokemonImage from '@/components/PokemonImage/PokemonImage';
 import { calculateTypeMatchups } from '@/utils/typeMatchups';
 import { PokemonPicker } from '../PokemonPicker/PokemonPicker';
+import { EmptyState } from '@/components/StateComponents/StateComponents';
 
 interface TeamAdvisorProps {
   onAnalyzeMatchup: (myPokemon: Pokemon, opponent: Pokemon) => void;
+  teamOverride?: Pokemon[];
+  initialOpponent?: Pokemon | null;
 }
 
-export const TeamAdvisor = memo(function TeamAdvisor({ onAnalyzeMatchup }: TeamAdvisorProps) {
+export const TeamAdvisor = memo(function TeamAdvisor({ onAnalyzeMatchup, teamOverride, initialOpponent }: TeamAdvisorProps) {
   const { team } = useFavorites();
-  const [opponent, setOpponent] = useState<Pokemon | null>(null);
+  const [opponent, setOpponent] = useState<Pokemon | null>(initialOpponent || null);
   const [teamData, setTeamData] = useState<Pokemon[]>([]);
 
   useEffect(() => {
-    if (team.length === 0) {
+    if (initialOpponent) {
+      setOpponent(initialOpponent);
+    }
+  }, [initialOpponent]);
+
+  useEffect(() => {
+    const validTeam = team.filter(Boolean);
+    if (validTeam.length === 0) {
       setTeamData([]);
       return;
     }
-    Promise.all(team.map(m => fetchPokemon(m.id)))
+    Promise.all(validTeam.map(m => fetchPokemon(m!.id)))
       .then(setTeamData)
       .catch(console.error);
   }, [team]);
 
+  const currentTeamData = teamOverride || teamData;
+
   const recommendations = useMemo(() => {
-    if (!opponent || teamData.length === 0) return null;
+    if (!opponent || currentTeamData.length === 0) return null;
     
     const opponentTypes = opponent.types.map(t => t.type.name);
     const oppMatchups = calculateTypeMatchups(opponentTypes); 
@@ -35,7 +47,7 @@ export const TeamAdvisor = memo(function TeamAdvisor({ onAnalyzeMatchup }: TeamA
     const neutral: Pokemon[] = [];
     const danger: Pokemon[] = [];
 
-    teamData.forEach(p => {
+    currentTeamData.forEach(p => {
       const pTypes = p.types.map(t => t.type.name);
       const pMatchups = calculateTypeMatchups(pTypes);
 
@@ -55,9 +67,20 @@ export const TeamAdvisor = memo(function TeamAdvisor({ onAnalyzeMatchup }: TeamA
     });
 
     return { vanguard, neutral, danger };
-  }, [opponent, teamData]);
+  }, [opponent, currentTeamData]);
 
-  if (team.length === 0) return null;
+  if (currentTeamData.length === 0 && !teamOverride) {
+    return (
+      <section className="team-advisor" aria-label="Analizador de Equipo">
+        <h2 className="games-section-title">Analizador de Equipo</h2>
+        <EmptyState 
+          icon="🛡️" 
+          title="Equipo vacío" 
+          message="Agrega Pokémon a tu equipo para poder usar el Analizador." 
+        />
+      </section>
+    );
+  }
 
   return (
     <section className="team-advisor" aria-label="Analizador de Equipo">

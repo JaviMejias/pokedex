@@ -1,6 +1,7 @@
-import { memo, useState, useMemo, useEffect } from 'react';
+import { memo, useState, useMemo, useEffect, useCallback } from 'react';
 import type { Pokemon } from '@/types/pokemon';
-import { fetchAbilityTranslation } from '@/services/pokemonService';
+import { fetchAbilityTranslation, fetchPokemon } from '@/services/pokemonService';
+import { useFavorites } from '@/contexts/FavoritesContext';
 import TypeBadge from '@/components/TypeBadge/TypeBadge';
 import { STAT_NAMES } from '@/utils/dictionaries';
 import { calculateTypeMatchups } from '@/utils/typeMatchups';
@@ -63,17 +64,74 @@ interface ComparatorProps {
   setLeft: (p: Pokemon | null) => void;
   right: Pokemon | null;
   setRight: (p: Pokemon | null) => void;
+  sharedTeam?: Pokemon[];
 }
 
-export const Comparator = memo(function Comparator({ left, setLeft, right, setRight }: ComparatorProps) {
+export const Comparator = memo(function Comparator({ left, setLeft, right, setRight, sharedTeam = [] }: ComparatorProps) {
   const [activeTab, setActiveTab] = useState<ComparatorTabId>('stats');
+  const { team } = useFavorites();
+  const validTeam = team.filter(Boolean) as { id: number; name: string; speciesName?: string }[];
 
   const statNames = ['hp', 'attack', 'defense', 'special-attack', 'special-defense', 'speed'];
+
+  const handleQuickSelect = useCallback(async (p: Pokemon | {id: number; name: string}, side: 'left' | 'right') => {
+    let fullPokemon: Pokemon;
+    if ('stats' in p) {
+      fullPokemon = p as Pokemon;
+    } else {
+      fullPokemon = await fetchPokemon(p.id);
+    }
+    
+    if (side === 'left') {
+      setLeft(fullPokemon);
+    } else {
+      setRight(fullPokemon);
+    }
+  }, [setLeft, setRight]);
 
   return (
     <section className="comparator" aria-label="Comparador de Pokémon">
       <h2 className="games-section-title">{es.games.comparator.title}</h2>
       <p className="games-section-subtitle">{es.games.comparator.subtitle}</p>
+
+      {(validTeam.length > 0 || sharedTeam.length > 0) && (
+        <div className="comparator__quick-picks">
+          {validTeam.length > 0 && (
+            <div className="comparator__quick-pick-group">
+              <span className="comparator__quick-pick-title">Tu Equipo:</span>
+              <div className="comparator__cards-row">
+                {validTeam.map(p => (
+                  <div className="comparator__card" key={p.id}>
+                    <img src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png`} alt={p.name} className="comparator__card-sprite" />
+                    <span className="comparator__card-name pokemon-name">{p.name}</span>
+                    <div className="comparator__card-actions">
+                      <button className="comparator__card-btn" onClick={() => handleQuickSelect(p, 'left')} title="Cargar a la izquierda">1</button>
+                      <button className="comparator__card-btn" onClick={() => handleQuickSelect(p, 'right')} title="Cargar a la derecha">2</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          {sharedTeam.length > 0 && (
+            <div className="comparator__quick-pick-group">
+              <span className="comparator__quick-pick-title">Equipo Compartido:</span>
+              <div className="comparator__cards-row">
+                {sharedTeam.map(p => (
+                  <div className="comparator__card" key={p.id}>
+                    <img src={p.sprites.front_default || ''} alt={p.name} className="comparator__card-sprite" />
+                    <span className="comparator__card-name pokemon-name">{p.name}</span>
+                    <div className="comparator__card-actions">
+                      <button className="comparator__card-btn" onClick={() => handleQuickSelect(p, 'left')} title="Cargar a la izquierda">1</button>
+                      <button className="comparator__card-btn" onClick={() => handleQuickSelect(p, 'right')} title="Cargar a la derecha">2</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="comparator__pickers">
         <PokemonPicker
@@ -126,33 +184,31 @@ export const Comparator = memo(function Comparator({ left, setLeft, right, setRi
 
                 return (
                   <div key={statName} className="comparator__stat-row">
-                    <div className="comparator__stat-center">
-                      <span className="comparator__stat-name">{STAT_NAMES[statName] ?? statName}</span>
-                      <div className="comparator__bars">
-                        <div className="comparator__bar-wrapper">
-                          <div className="comparator__stat-meta">
-                            {left.sprites.front_default && <img src={left.sprites.front_default} alt="" className="comparator__stat-avatar" />}
-                            <span className={`comparator__stat-value${leftWins ? ' comparator__stat-value--winner' : ''}`}>
-                              {leftWins && <span className="comparator__winner-icon">★</span>}
-                              {leftStat}
-                            </span>
-                          </div>
-                          <div className="comparator__bar comparator__bar--left">
-                            <div className="comparator__bar-fill" style={{ width: `${Math.min(100, (leftStat / 255) * 100)}%` }} />
-                          </div>
-                        </div>
-                        <div className="comparator__bar-wrapper comparator__bar-wrapper--right">
-                          <div className="comparator__stat-meta">
-                            <span className={`comparator__stat-value${rightWins ? ' comparator__stat-value--winner' : ''}`}>
-                              {rightStat}
-                              {rightWins && <span className="comparator__winner-icon">★</span>}
-                            </span>
-                            {right.sprites.front_default && <img src={right.sprites.front_default} alt="" className="comparator__stat-avatar" />}
-                          </div>
-                          <div className="comparator__bar comparator__bar--right">
-                            <div className="comparator__bar-fill" style={{ width: `${Math.min(100, (rightStat / 255) * 100)}%` }} />
-                          </div>
-                        </div>
+                    <div className="comparator__bar-wrapper comparator__bar-wrapper--left">
+                      <div className="comparator__stat-meta">
+                        {left.sprites.front_default && <img src={left.sprites.front_default} alt="" className="comparator__stat-avatar" />}
+                        <span className={`comparator__stat-value${leftWins ? ' comparator__stat-value--winner' : ''}`}>
+                          {leftWins && <span className="comparator__winner-icon">★</span>}
+                          {leftStat}
+                        </span>
+                      </div>
+                      <div className="comparator__bar comparator__bar--left">
+                        <div className="comparator__bar-fill" style={{ width: `${Math.min(100, (leftStat / 255) * 100)}%` }} />
+                      </div>
+                    </div>
+                    
+                    <span className="comparator__stat-name">{STAT_NAMES[statName] ?? statName}</span>
+                    
+                    <div className="comparator__bar-wrapper comparator__bar-wrapper--right">
+                      <div className="comparator__bar comparator__bar--right">
+                        <div className="comparator__bar-fill" style={{ width: `${Math.min(100, (rightStat / 255) * 100)}%` }} />
+                      </div>
+                      <div className="comparator__stat-meta">
+                        <span className={`comparator__stat-value${rightWins ? ' comparator__stat-value--winner' : ''}`}>
+                          {rightStat}
+                          {rightWins && <span className="comparator__winner-icon">★</span>}
+                        </span>
+                        {right.sprites.front_default && <img src={right.sprites.front_default} alt="" className="comparator__stat-avatar" />}
                       </div>
                     </div>
                   </div>

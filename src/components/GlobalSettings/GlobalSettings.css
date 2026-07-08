@@ -307,3 +307,26 @@
   color: white;
   border-color: var(--color-brand-primary);
 }
+
+/* API Key section */
+.global-settings-panel__api-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+}
+
+.global-settings-panel__api-hint {
+  font-size: 11px;
+  color: var(--color-text-secondary, #aaa);
+  margin: 6px 0 0 0;
+}
+
+.global-settings-panel__api-hint a {
+  color: var(--color-brand-primary, #cc0000);
+  text-decoration: none;
+}
+
+.global-settings-panel__api-hint a:hover {
+  text-decoration: underline;
+}

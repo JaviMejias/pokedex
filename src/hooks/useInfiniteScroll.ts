@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { fetchPokemonList, fetchPokemon, fetchTypeData } from '@/services/pokemonService';
+import { fetchPokemon, fetchTypeData, fetchAllPokemonNames } from '@/services/pokemonService';
 import type { Pokemon } from '@/types/pokemon';
 import { PAGE_SIZE } from '@/constants';
 
@@ -14,7 +14,12 @@ interface UseInfiniteScrollReturn {
   total: number;
 }
 
-export function useInfiniteScroll(typeFilters: string[] = []): UseInfiniteScrollReturn {
+export function useInfiniteScroll(
+  typeFilters: string[] = [],
+  generationRange: [number, number] | null = null,
+  sortMode: 'id' | 'name' = 'id',
+  sortOrder: 'asc' | 'desc' = 'asc'
+): UseInfiniteScrollReturn {
   const [pokemon, setPokemon] = useState<Pokemon[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -29,45 +34,54 @@ export function useInfiniteScroll(typeFilters: string[] = []): UseInfiniteScroll
     isLoadingRef.current = true;
 
     try {
-      let results: { name: string }[] = [];
-      let totalCount = 0;
-      let hasNext = false;
+      const allNamesList = await fetchAllPokemonNames();
+      
+      let validNames = new Set<string>();
+      const idMap = new Map<string, number>();
+
+      for (const p of allNamesList) {
+        const id = parseInt(p.url.replace(/\/$/, '').split('/').pop() || '0', 10);
+        if (id > 0 && id < 10000) {
+          validNames.add(p.name);
+          idMap.set(p.name, id);
+        }
+      }
+
+      if (generationRange) {
+        const [min, max] = generationRange;
+        for (const name of validNames) {
+          const id = idMap.get(name)!;
+          if (id < min || id > max) {
+            validNames.delete(name);
+          }
+        }
+      }
 
       if (typeFilters.length > 0) {
         const typeDatas = await Promise.all(typeFilters.map(t => fetchTypeData(t)));
-        
-        let validNames = new Set(typeDatas[0].pokemon.map(p => p.pokemon.name));
-        const idMap = new Map<string, number>();
-        
-        for (const p of typeDatas[0].pokemon) {
-          idMap.set(p.pokemon.name, parseInt(p.pokemon.url.split('/').filter(Boolean).pop() || '0', 10));
-        }
-
-        for (let i = 1; i < typeDatas.length; i++) {
-          const nextSet = new Set(typeDatas[i].pokemon.map(p => p.pokemon.name));
-          for (const p of typeDatas[i].pokemon) {
-            idMap.set(p.pokemon.name, parseInt(p.pokemon.url.split('/').filter(Boolean).pop() || '0', 10));
-          }
+        for (const typeData of typeDatas) {
+          const typeSet = new Set(typeData.pokemon.map(p => p.pokemon.name));
           for (const name of validNames) {
-            if (!nextSet.has(name)) validNames.delete(name);
+            if (!typeSet.has(name)) {
+              validNames.delete(name);
+            }
           }
         }
-
-        for (const name of validNames) {
-          if ((idMap.get(name) || 0) >= 10000) validNames.delete(name);
-        }
-
-        const sortedNames = Array.from(validNames).sort((a, b) => (idMap.get(a) || 0) - (idMap.get(b) || 0));
-        
-        totalCount = sortedNames.length;
-        results = sortedNames.slice(offset, offset + PAGE_SIZE).map(name => ({ name }));
-        hasNext = offset + PAGE_SIZE < totalCount;
-      } else {
-        const list = await fetchPokemonList(offset, PAGE_SIZE);
-        totalCount = list.count;
-        results = list.results;
-        hasNext = list.next !== null;
       }
+
+      const sortedNames = Array.from(validNames).sort((a, b) => {
+        let comparison = 0;
+        if (sortMode === 'id') {
+          comparison = idMap.get(a)! - idMap.get(b)!;
+        } else {
+          comparison = a.localeCompare(b);
+        }
+        return sortOrder === 'asc' ? comparison : -comparison;
+      });
+      
+      const totalCount = sortedNames.length;
+      const results = sortedNames.slice(offset, offset + PAGE_SIZE).map(name => ({ name }));
+      const hasNext = offset + PAGE_SIZE < totalCount;
 
       setTotal(totalCount);
       setHasMore(hasNext);
@@ -87,7 +101,7 @@ export function useInfiniteScroll(typeFilters: string[] = []): UseInfiniteScroll
     } finally {
       isLoadingRef.current = false;
     }
-  }, [typeFilters]);
+  }, [typeFilters, generationRange, sortMode, sortOrder]);
 
   const loadMore = useCallback(() => {
     if (isLoadingRef.current || !hasMore) return;

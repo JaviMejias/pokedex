@@ -193,6 +193,7 @@ export type PokemonTypeName =
 export interface TeamMember {
   id: number;
   name: string;
+  speciesName?: string;
 }
 
 export type NavigationTab = 'explore' | 'scanner' | 'games';

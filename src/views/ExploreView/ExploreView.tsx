@@ -10,7 +10,7 @@ import { usePokemonContext } from '@/contexts/PokemonContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import type { Pokemon } from '@/types/pokemon';
-import { ALL_TYPES } from '@/utils/dictionaries';
+import { ALL_TYPES, GENERATIONS } from '@/utils/dictionaries';
 import es from '@/i18n/es';
 import './ExploreView.css';
 
@@ -20,7 +20,9 @@ const ExploreView = memo(function ExploreView() {
   const { openDetail, history } = usePokemonContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedGeneration, setSelectedGeneration] = useState<number | null>(null);
   const [sortMode, setSortMode] = useState<SortMode>('id');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [searchResults, setSearchResults] = useState<Pokemon[] | null>(null);
   const [isSearching, setIsSearching] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -31,7 +33,14 @@ const ExploreView = memo(function ExploreView() {
   const debouncedQuery = useDebounce(searchQuery, 300);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const { pokemon, isLoading, isLoadingMore, error, loadMore, reset } = useInfiniteScroll(selectedTypes);
+  const activeGenObj = useMemo(() => GENERATIONS.find(g => g.id === selectedGeneration), [selectedGeneration]);
+
+  const { pokemon, isLoading, isLoadingMore, error, loadMore, reset } = useInfiniteScroll(
+    selectedTypes,
+    activeGenObj ? activeGenObj.range : null,
+    sortMode,
+    sortOrder
+  );
 
   useEffect(() => {
     if (showFavorites) return; // Si estamos en modo favoritos, no hacer búsqueda normal
@@ -97,19 +106,28 @@ const ExploreView = memo(function ExploreView() {
   useEffect(() => {
     if (!sentinelRef.current || searchResults !== null) return;
     const observer = new IntersectionObserver(
-      entries => { if (entries[0].isIntersecting && !isLoadingMore) loadMore(); },
+      entries => { if (entries[0].isIntersecting && !isLoadingMore && !isLoading) loadMore(); },
       { threshold: 0.1, rootMargin: '200px' }
     );
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
-  }, [loadMore, isLoadingMore, searchResults]);
+  }, [loadMore, isLoadingMore, isLoading, searchResults]);
 
   const displayedPokemon = useMemo(() => {
-    const list = searchResults ?? pokemon;
-    return [...list].sort((a, b) =>
-      sortMode === 'id' ? a.id - b.id : a.name.localeCompare(b.name)
-    );
-  }, [searchResults, pokemon, sortMode]);
+    if (searchResults) {
+      const sorted = [...searchResults].sort((a, b) => {
+        let comparison = 0;
+        if (sortMode === 'id') {
+          comparison = a.id - b.id;
+        } else {
+          comparison = a.name.localeCompare(b.name);
+        }
+        return sortOrder === 'asc' ? comparison : -comparison;
+      });
+      return sorted;
+    }
+    return pokemon;
+  }, [searchResults, pokemon, sortMode, sortOrder]);
 
   const handleTypeSelect = useCallback((type: string) => {
     if (type === '') {
@@ -245,35 +263,79 @@ const ExploreView = memo(function ExploreView() {
           >
             {es.explore.sortByName}
           </button>
+          
+          <button
+            className="explore-view__sort-order-btn"
+            onClick={() => setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc')}
+            type="button"
+            aria-label={`Orden ${sortOrder === 'asc' ? 'Ascendente' : 'Descendente'}`}
+            title={`Orden ${sortOrder === 'asc' ? 'Ascendente' : 'Descendente'}`}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: sortOrder === 'desc' ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <polyline points="19 12 12 19 5 12" />
+            </svg>
+          </button>
         </div>
 
-        {/* Type filter panel */}
+        {/* Filter panel */}
         {isFilterOpen && (
-          <div className="explore-view__filter-panel" role="group" aria-label="Filtrar por tipo">
-            <button
-              className={`explore-view__type-all${selectedTypes.length === 0 ? ' explore-view__type-all--active' : ''}`}
-              onClick={() => handleTypeSelect('')}
-              type="button"
-            >
-              {es.explore.allTypes}
-            </button>
-            {ALL_TYPES.map(type => (
-              <button
-                key={type}
-                className={`explore-view__type-filter${selectedTypes.includes(type) ? ' explore-view__type-filter--active' : ''}`}
-                onClick={() => handleTypeSelect(type)}
-                type="button"
-                aria-pressed={selectedTypes.includes(type)}
-              >
-                <TypeBadge type={type} size="sm" />
-              </button>
-            ))}
+          <div className="explore-view__filter-panel">
+            {/* Types */}
+            <div className="explore-view__filter-group">
+              <span className="explore-view__filter-label">Tipos:</span>
+              <div className="explore-view__filter-options" role="group" aria-label="Filtrar por tipo">
+                <button
+                  className={`explore-view__type-all${selectedTypes.length === 0 ? ' explore-view__type-all--active' : ''}`}
+                  onClick={() => handleTypeSelect('')}
+                  type="button"
+                >
+                  {es.explore.allTypes}
+                </button>
+                {ALL_TYPES.map(type => (
+                  <button
+                    key={type}
+                    className={`explore-view__type-filter${selectedTypes.includes(type) ? ' explore-view__type-filter--active' : ''}`}
+                    onClick={() => handleTypeSelect(type)}
+                    type="button"
+                    aria-pressed={selectedTypes.includes(type)}
+                  >
+                    <TypeBadge type={type} size="sm" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Generations */}
+            <div className="explore-view__filter-group">
+              <span className="explore-view__filter-label">Generación:</span>
+              <div className="explore-view__filter-options" role="group" aria-label="Filtrar por generación">
+                <button
+                  className={`explore-view__gen-filter${selectedGeneration === null ? ' explore-view__gen-filter--active' : ''}`}
+                  onClick={() => setSelectedGeneration(null)}
+                  type="button"
+                >
+                  Todas
+                </button>
+                {GENERATIONS.map(gen => (
+                  <button
+                    key={gen.id}
+                    className={`explore-view__gen-filter${selectedGeneration === gen.id ? ' explore-view__gen-filter--active' : ''}`}
+                    onClick={() => setSelectedGeneration(gen.id)}
+                    type="button"
+                    aria-pressed={selectedGeneration === gen.id}
+                  >
+                    Gen {gen.id}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </header>
 
       {/* Recently visited */}
-      {history.length > 0 && !searchQuery && selectedTypes.length === 0 && (
+      {history.length > 0 && !searchQuery && selectedTypes.length === 0 && selectedGeneration === null && (
         <section className="explore-view__history" aria-label={es.history.title}>
           <h2 className="explore-view__section-title">{es.history.title}</h2>
           <div className="explore-view__history-list">
@@ -292,7 +354,7 @@ const ExploreView = memo(function ExploreView() {
       )}
 
       {/* Active filters display */}
-      {selectedTypes.length > 0 && (
+      {(selectedTypes.length > 0 || selectedGeneration !== null) && (
         <div className="explore-view__active-filters">
           <span className="explore-view__active-filters-label">Filtros activos:</span>
           {selectedTypes.map(type => (
@@ -300,16 +362,27 @@ const ExploreView = memo(function ExploreView() {
               key={type}
               className="explore-view__active-filter-chip"
               onClick={() => handleTypeSelect(type)}
-              aria-label={`Quitar filtro ${type}`}
-              title="Quitar"
+              type="button"
+              aria-label={`Eliminar filtro de tipo ${type}`}
             >
               <TypeBadge type={type} size="sm" />
-              <span className="explore-view__active-filter-close">×</span>
+              <span className="explore-view__active-filter-close">&times;</span>
             </button>
           ))}
+          {selectedGeneration !== null && activeGenObj && (
+            <button
+              className="explore-view__active-filter-chip explore-view__active-filter-chip--gen"
+              onClick={() => setSelectedGeneration(null)}
+              type="button"
+              aria-label={`Eliminar filtro de ${activeGenObj.name}`}
+            >
+              <span>{activeGenObj.name}</span>
+              <span className="explore-view__active-filter-close">&times;</span>
+            </button>
+          )}
           <button
             className="explore-view__clear-filters"
-            onClick={() => handleTypeSelect('')}
+            onClick={() => { handleTypeSelect(''); setSelectedGeneration(null); }}
           >
             Limpiar
           </button>

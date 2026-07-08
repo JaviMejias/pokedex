@@ -14,6 +14,7 @@ export const STORAGE_KEYS = {
   TEAM: 'pokedex-pro:team',
   SKIN: 'pokedex-pro:skin',
   YOUTUBE_URL: 'pokedex-pro:youtube-url',
+  SAVED_TEAMS: 'pokedex-pro:saved-teams',
 } as const;
 
 export const IDB_CONFIG = {

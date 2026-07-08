@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef, useState, useCallback } from 'react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useSettings } from '@/contexts/SettingsContext';
+import { useApiKey } from '@/hooks/useApiKey';
 import { usePWA } from '@/hooks/usePWA';
 import { STORAGE_KEYS } from '@/constants';
 import './GlobalSettings.css';
@@ -38,7 +39,18 @@ function parseYouTubeId(url: string): { type: 'video' | 'playlist', id: string }
 const GlobalSettings = memo(function GlobalSettings() {
   const { theme, toggleTheme } = useTheme();
   const { skin, toggleSkin } = useSettings();
+  const { apiKey, setApiKey } = useApiKey();
   const { forceReload } = usePWA();
+
+  const [apiKeyInput, setApiKeyInput] = useState(() => apiKey || '');
+  const [apiKeySaved, setApiKeySaved] = useState(false);
+
+  const handleSaveApiKey = (e: React.FormEvent) => {
+    e.preventDefault();
+    setApiKey(apiKeyInput.trim());
+    setApiKeySaved(true);
+    setTimeout(() => setApiKeySaved(false), 2000);
+  };
   
   const playerRef = useRef<any>(null);
   
@@ -257,6 +269,25 @@ const GlobalSettings = memo(function GlobalSettings() {
                   {skin === 'retro' ? '🖥️ Modo PC' : '📱 Modo Consola'}
                 </button>
               </div>
+            </div>
+
+            <div className="global-settings-panel__section">
+              <span className="global-settings-panel__section-title">Inteligencia Artificial (Gemini)</span>
+              <form className="global-settings-panel__api-form" onSubmit={handleSaveApiKey}>
+                <input
+                  type="password"
+                  className="global-settings-panel__input"
+                  placeholder="Pega tu API Key de Gemini..."
+                  value={apiKeyInput}
+                  onChange={e => setApiKeyInput(e.target.value)}
+                  autoComplete="off"
+                />
+                <button type="submit" className="global-settings-panel__btn-small">
+                  {apiKeySaved ? '✓ Guardada' : apiKey ? '🔑 Actualizar' : '🔑 Guardar'}
+                </button>
+              </form>
+              {apiKey && <p className="global-settings-panel__api-hint">API Key activa ✓ — Rotom Dex y Scanner están listos.</p>}
+              {!apiKey && <p className="global-settings-panel__api-hint"><a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer">Obtener clave gratuita →</a></p>}
             </div>
 
             <div className="global-settings-panel__section">

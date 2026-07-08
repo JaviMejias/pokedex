@@ -13,11 +13,6 @@ export default defineConfig({
     port: 3000,
     open: true,
     host: true,
-    hmr: {
-      protocol: 'ws',
-      host: 'localhost',
-      clientPort: 3000,
-    }
   },
   build: {
     target: 'es2020',

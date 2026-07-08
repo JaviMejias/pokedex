@@ -41,37 +41,6 @@ function playCry(pokemon: Pokemon): void {
   }
 }
 
-const VERSION_TO_SPRITE_MAP: Record<string, [string, string]> = {
-  'red': ['generation-i', 'red-blue'],
-  'blue': ['generation-i', 'red-blue'],
-  'yellow': ['generation-i', 'yellow'],
-  'gold': ['generation-ii', 'gold'],
-  'silver': ['generation-ii', 'silver'],
-  'crystal': ['generation-ii', 'crystal'],
-  'ruby': ['generation-iii', 'ruby-sapphire'],
-  'sapphire': ['generation-iii', 'ruby-sapphire'],
-  'emerald': ['generation-iii', 'emerald'],
-  'firered': ['generation-iii', 'firered-leafgreen'],
-  'leafgreen': ['generation-iii', 'firered-leafgreen'],
-  'diamond': ['generation-iv', 'diamond-pearl'],
-  'pearl': ['generation-iv', 'diamond-pearl'],
-  'platinum': ['generation-iv', 'platinum'],
-  'heartgold': ['generation-iv', 'heartgold-soulsilver'],
-  'soulsilver': ['generation-iv', 'heartgold-soulsilver'],
-  'black': ['generation-v', 'black-white'],
-  'white': ['generation-v', 'black-white'],
-  'black-2': ['generation-v', 'black-white'],
-  'white-2': ['generation-v', 'black-white'],
-  'x': ['generation-vi', 'x-y'],
-  'y': ['generation-vi', 'x-y'],
-  'omega-ruby': ['generation-vi', 'omegaruby-alphasapphire'],
-  'alpha-sapphire': ['generation-vi', 'omegaruby-alphasapphire'],
-  'sun': ['generation-vii', 'ultra-sun-ultra-moon'],
-  'moon': ['generation-vii', 'ultra-sun-ultra-moon'],
-  'ultra-sun': ['generation-vii', 'ultra-sun-ultra-moon'],
-  'ultra-moon': ['generation-vii', 'ultra-sun-ultra-moon']
-};
-
 const PokemonDetail = memo(function PokemonDetail() {
   const { selectedPokemon, isDetailOpen, isDetailLoading, detailError, closeDetail } = usePokemonContext();
   const { isFavorite, toggleFavorite, isInTeam, addToTeam, removeFromTeam } = useFavorites();
@@ -80,14 +49,12 @@ const PokemonDetail = memo(function PokemonDetail() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isShiny, setIsShiny] = useState(false);
   const [species, setSpecies] = useState<PokemonSpecies | null>(null);
-  const [selectedVersion, setSelectedVersion] = useState<string>('');
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (selectedPokemon) {
       setIsShiny(false);
-      setSelectedVersion('');
       const speciesId = parseInt(selectedPokemon.species.url.split('/').filter(Boolean).pop() || '0', 10);
       fetchPokemonSpecies(speciesId || selectedPokemon.id)
         .then(setSpecies)
@@ -96,19 +63,6 @@ const PokemonDetail = memo(function PokemonDetail() {
       setSpecies(null);
     }
   }, [selectedPokemon]);
-
-  useEffect(() => {
-    if (species && !selectedVersion) {
-      const spanishEntries = species.flavor_text_entries.filter(e => e.language.name === 'es');
-      if (spanishEntries.length > 0) {
-        setSelectedVersion(spanishEntries[0].version.name);
-      }
-    }
-  }, [species, selectedVersion]);
-
-  const handleVersionChange = useCallback((v: string) => {
-    setSelectedVersion(v);
-  }, []);
 
   useEffect(() => {
     if (isDetailOpen) {
@@ -154,11 +108,11 @@ const PokemonDetail = memo(function PokemonDetail() {
 
   const handleTeamToggle = useCallback(() => {
     if (!selectedPokemon) return;
-    if (isInTeam(selectedPokemon.id)) {
+    if (isInTeam(selectedPokemon.id, selectedPokemon.species.name)) {
       removeFromTeam(selectedPokemon.id);
       showToast('Eliminado del equipo');
     } else {
-      addToTeam(selectedPokemon.id, selectedPokemon.name);
+      addToTeam(selectedPokemon.id, selectedPokemon.name, selectedPokemon.species.name);
       showToast('Añadido al equipo');
     }
   }, [selectedPokemon, isInTeam, addToTeam, removeFromTeam, showToast]);
@@ -174,31 +128,8 @@ const PokemonDetail = memo(function PokemonDetail() {
   const primaryType = selectedPokemon?.types[0]?.type.name ?? 'normal';
   const primaryColor = TYPE_COLORS[primaryType] ?? '#888888';
 
-  let versionSprite = null;
-  if (selectedPokemon && selectedVersion && VERSION_TO_SPRITE_MAP[selectedVersion]) {
-    const [gen, game] = VERSION_TO_SPRITE_MAP[selectedVersion];
-    const gameData = (selectedPokemon.sprites.versions as any)?.[gen]?.[game];
-    if (gameData) {
-      if (game === 'black-white' && gameData.animated) {
-        versionSprite = isShiny ? gameData.animated.front_shiny : gameData.animated.front_default;
-      } else {
-        versionSprite = isShiny ? gameData.front_shiny : gameData.front_default;
-      }
-    }
-  }
-
-  if (versionSprite && typeof versionSprite === 'string') {
-    versionSprite = versionSprite.replace('raw.githubusercontent.com/PokeAPI/sprites/master', 'cdn.jsdelivr.net/gh/PokeAPI/sprites@master');
-  }
-
-
-
   let mainImageSrc: string | null = null;
   if (selectedPokemon) {
-    // Si hay un sprite de versión (retro), úsalo si lo seleccionó.
-    // Sino, por defecto cargar el artwork oficial (que es rápido).
-    // Evitamos cargar GIFs animados por defecto porque son muy pesados.
-    
     let rawOfficial = isShiny 
       ? selectedPokemon.sprites.other['official-artwork'].front_shiny 
       : selectedPokemon.sprites.other['official-artwork'].front_default;
@@ -212,10 +143,7 @@ const PokemonDetail = memo(function PokemonDetail() {
       rawFront = rawFront.replace('raw.githubusercontent.com/PokeAPI/sprites/master', 'cdn.jsdelivr.net/gh/PokeAPI/sprites@master');
     }
 
-    mainImageSrc = versionSprite
-      ?? rawOfficial
-      ?? rawFront
-      ?? getOfficialArtwork(selectedPokemon.id);
+    mainImageSrc = rawOfficial ?? rawFront ?? getOfficialArtwork(selectedPokemon.id);
   }
 
   return (
@@ -272,12 +200,12 @@ const PokemonDetail = memo(function PokemonDetail() {
                 </svg>
               </button>
               <button
-                className={`pokemon-detail__action-btn${isInTeam(selectedPokemon.id) ? ' pokemon-detail__action-btn--team' : ''}`}
+                className={`pokemon-detail__action-btn${isInTeam(selectedPokemon.id, selectedPokemon.species.name) ? ' pokemon-detail__action-btn--team' : ''}`}
                 onClick={handleTeamToggle}
-                aria-label={isInTeam(selectedPokemon.id) ? 'Quitar del equipo' : 'Agregar al equipo'}
+                aria-label={isInTeam(selectedPokemon.id, selectedPokemon.species.name) ? 'Quitar del equipo' : 'Agregar al equipo'}
                 type="button"
               >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill={isInTeam(selectedPokemon.id) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill={isInTeam(selectedPokemon.id, selectedPokemon.species.name) ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="12" r="10"/>
                   <circle cx="12" cy="12" r="3"/>
                   <path d="M2 12h7M15 12h7"/>
@@ -375,7 +303,7 @@ const PokemonDetail = memo(function PokemonDetail() {
                 id={`tab-panel-${activeTab}`}
                 aria-labelledby={`tab-${activeTab}`}
               >
-                {activeTab === 'basic' && <BasicTab pokemon={selectedPokemon} species={species} selectedVersion={selectedVersion} onVersionChange={handleVersionChange} />}
+                {activeTab === 'basic' && <BasicTab pokemon={selectedPokemon} species={species} />}
                 {activeTab === 'stats' && <StatsTab pokemon={selectedPokemon} />}
                 {activeTab === 'combat' && <CombatTab pokemon={selectedPokemon} />}
                 {activeTab === 'evolutions' && <EvolutionsTab pokemon={selectedPokemon} />}

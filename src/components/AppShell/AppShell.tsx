@@ -1,4 +1,4 @@
-import { memo, useState, useCallback, Suspense } from 'react';
+import { memo, useState, useCallback, Suspense, useEffect } from 'react';
 import BottomNav from '@/components/BottomNav/BottomNav';
 import GlobalSettings from '@/components/GlobalSettings/GlobalSettings';
 import ConnectivityIndicator from '@/components/ConnectivityIndicator/ConnectivityIndicator';
@@ -54,6 +54,12 @@ const AppShell = memo(function AppShell() {
   const handleTabChange = useCallback((tab: NavigationTab) => {
     setActiveTab(tab);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  useEffect(() => {
+    if (window.location.search.includes('team=')) {
+      setActiveTab('games');
+    }
   }, []);
 
   return (
