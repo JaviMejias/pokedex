@@ -30,23 +30,11 @@ const PokemonCard = memo(function PokemonCard({ pokemon, index = 0 }: PokemonCar
     toggleFavorite(pokemon.id, pokemon.name);
   }, [toggleFavorite, pokemon.id, pokemon.name]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      openDetail(pokemon.name);
-    }
-  }, [openDetail, pokemon.name]);
-
   const primaryType = pokemon.types[0]?.type.name ?? 'normal';
 
   return (
     <article
       className="pokemon-card"
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
-      role="button"
-      aria-label={`Ver detalles de ${pokemon.name} #${pokemon.id}`}
       style={{ '--card-delay': `${(index % 20) * 30}ms`, '--primary-type': `var(--type-${primaryType}, #888)` } as React.CSSProperties}
     >
       <div className="pokemon-card__bg-pokeball" aria-hidden="true" />
@@ -60,24 +48,26 @@ const PokemonCard = memo(function PokemonCard({ pokemon, index = 0 }: PokemonCar
         {favorite ? '★' : '☆'}
       </button>
 
-      <div className="pokemon-card__image-wrapper">
-        <PokemonImage
-          src={artworkSrc}
-          alt={pokemon.name}
-          id={pokemon.id}
-          className="pokemon-card__image"
-        />
-      </div>
-
-      <div className="pokemon-card__info">
-        <span className="pokemon-card__id pokemon-id">{formatPokemonId(pokemon.id)}</span>
-        <h2 className="pokemon-card__name pokemon-name">{pokemon.name}</h2>
-        <div className="pokemon-card__types">
-          {pokemon.types.map(t => (
-            <TypeBadge key={t.type.name} type={t.type.name} size="sm" />
-          ))}
+      <button className="pokemon-card__open" onClick={handleClick} type="button" aria-label={`Ver detalles de ${pokemon.name} #${pokemon.id}`}>
+        <div className="pokemon-card__image-wrapper">
+          <PokemonImage
+            src={artworkSrc}
+            alt=""
+            id={pokemon.id}
+            className="pokemon-card__image"
+          />
         </div>
-      </div>
+
+        <div className="pokemon-card__info">
+          <span className="pokemon-card__id pokemon-id">{formatPokemonId(pokemon.id)}</span>
+          <h2 className="pokemon-card__name pokemon-name">{pokemon.name}</h2>
+          <div className="pokemon-card__types">
+            {pokemon.types.map(t => (
+              <TypeBadge key={t.type.name} type={t.type.name} size="sm" />
+            ))}
+          </div>
+        </div>
+      </button>
     </article>
   );
 });

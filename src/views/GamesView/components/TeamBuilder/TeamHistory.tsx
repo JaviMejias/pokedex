@@ -48,7 +48,9 @@ export const TeamHistory = memo(function TeamHistory() {
 
       {/* Save current team form */}
       <form className="team-history__save-form" onSubmit={handleSave}>
+        <label htmlFor="team-name" className="sr-only">Nombre del equipo</label>
         <input
+          id="team-name"
           type="text"
           className="team-history__input"
           placeholder="Nombre del equipo (ej: Mi equipo Johto)"
@@ -118,8 +120,8 @@ export const TeamHistory = memo(function TeamHistory() {
                   </div>
                 </div>
                 <div className="team-history__card-sprites">
-                  {members.map((m, i) => (
-                    <div key={i} className="team-history__sprite-wrapper" title={m!.name}>
+                  {members.map(m => (
+                    <div key={m!.id} className="team-history__sprite-wrapper" title={m!.name}>
                       <img
                         src={getOfficialArtwork(m!.id)}
                         alt={m!.name}

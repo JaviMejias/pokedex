@@ -50,10 +50,12 @@ const EvolutionsTab = memo(function EvolutionsTab({ pokemon }: EvolutionsTabProp
   const [itemTranslations, setItemTranslations] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    let cancelled = false;
     setIsLoading(true);
     fetchPokemonSpecies(pokemon.id)
       .then(species => fetchEvolutionChain(species.evolution_chain.url))
       .then(async (evo) => {
+        if (cancelled) return;
         setChain(evo);
         const nodes = flattenChain(evo.chain);
         const ids = [...new Set(nodes.map(n => n.to.id))];
@@ -72,11 +74,14 @@ const EvolutionsTab = memo(function EvolutionsTab({ pokemon }: EvolutionsTabProp
           })
         ]);
 
-        setSprites(spriteMap);
-        setItemTranslations(itemMap);
+        if (!cancelled) {
+          setSprites(spriteMap);
+          setItemTranslations(itemMap);
+        }
       })
-      .catch(() => setChain(null))
-      .finally(() => setIsLoading(false));
+      .catch(() => { if (!cancelled) setChain(null); })
+      .finally(() => { if (!cancelled) setIsLoading(false); });
+    return () => { cancelled = true; };
   }, [pokemon.id]);
 
   const handleNavigate = useCallback((name: string) => {

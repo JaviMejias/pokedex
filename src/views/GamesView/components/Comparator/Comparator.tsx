@@ -11,7 +11,7 @@ import es from '@/i18n/es';
 type ComparatorTabId = 'stats' | 'abilities' | 'matchups';
 
 const TranslatedAbility = memo(function TranslatedAbility({ name, isHidden }: { name: string, isHidden: boolean }) {
-  const [esName, setEsName] = useState(name.replace('-', ' '));
+  const [esName, setEsName] = useState(() => name.replace('-', ' '));
   useEffect(() => {
     fetchAbilityTranslation(name).then(setEsName);
   }, [name]);

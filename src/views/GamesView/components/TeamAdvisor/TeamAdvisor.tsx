@@ -41,6 +41,7 @@ export const TeamAdvisor = memo(function TeamAdvisor({ onAnalyzeMatchup, teamOve
     if (!opponent || currentTeamData.length === 0) return null;
     
     const opponentTypes = opponent.types.map(t => t.type.name);
+    const opponentTypeSet = new Set(opponentTypes);
     const oppMatchups = calculateTypeMatchups(opponentTypes); 
 
     const vanguard: Pokemon[] = [];
@@ -51,11 +52,12 @@ export const TeamAdvisor = memo(function TeamAdvisor({ onAnalyzeMatchup, teamOve
       const pTypes = p.types.map(t => t.type.name);
       const pMatchups = calculateTypeMatchups(pTypes);
 
-      const isWeakToOpponent = pMatchups.weak.some(t => opponentTypes.includes(t)) || 
-                               pMatchups.superWeak.some(t => opponentTypes.includes(t));
+      const isWeakToOpponent = pMatchups.weak.some(t => opponentTypeSet.has(t)) ||
+                               pMatchups.superWeak.some(t => opponentTypeSet.has(t));
       
-      const isStrongAgainstOpponent = oppMatchups.weak.some(t => pTypes.includes(t)) || 
-                                      oppMatchups.superWeak.some(t => pTypes.includes(t));
+      const pTypeSet = new Set(pTypes);
+      const isStrongAgainstOpponent = oppMatchups.weak.some(t => pTypeSet.has(t)) ||
+                                      oppMatchups.superWeak.some(t => pTypeSet.has(t));
 
       if (isWeakToOpponent) {
         danger.push(p);

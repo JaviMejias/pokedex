@@ -55,6 +55,14 @@ export const TeamAdventureAnalyzer = memo(function TeamAdventureAnalyzer() {
     setTabData(loadCache(teamSignature));
   }, [teamSignature, loadCache]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(CACHE_KEY_PREFIX + teamSignature, JSON.stringify(tabData));
+    } catch {
+      // ignore quota errors
+    }
+  }, [tabData, teamSignature]);
+
   const handleAnalyze = async (gameId: string, tab: TabType = 'general') => {
     setSelectedGame(gameId);
     setActiveTab(tab);
@@ -73,19 +81,7 @@ export const TeamAdventureAnalyzer = memo(function TeamAdventureAnalyzer() {
     
     const result = await analyzeFullTeamAdventure(apiKey, teamNames, game);
     
-    setTabData(prev => {
-      const next = {
-        ...prev,
-        [gameId]: result
-      };
-      // Persist to localStorage so it survives page reloads
-      try {
-        localStorage.setItem(CACHE_KEY_PREFIX + teamSignature, JSON.stringify(next));
-      } catch {
-        // ignore quota errors
-      }
-      return next;
-    });
+    setTabData(prev => ({ ...prev, [gameId]: result }));
     
     setIsAnalyzing(false);
   };
@@ -247,8 +243,8 @@ export const TeamAdventureAnalyzer = memo(function TeamAdventureAnalyzer() {
                     <p>{currentData.summary}</p>
                   </div>
                   <div className="adventure-analyzer__challenges">
-                    {currentData.challenges?.map((challenge: any, idx: number) => (
-                      <ChallengeCard key={idx} challenge={challenge} />
+                    {currentData.challenges?.map((challenge: any) => (
+                      <ChallengeCard key={`${challenge.leader ?? 'challenge'}-${challenge.specialty ?? 'mixed'}-${challenge.acePokemon ?? 'unknown'}`} challenge={challenge} />
                     ))}
                   </div>
                 </div>
@@ -263,8 +259,8 @@ export const TeamAdventureAnalyzer = memo(function TeamAdventureAnalyzer() {
                     <p>{currentData.summary}</p>
                   </div>
                   <div className="adventure-analyzer__challenges">
-                    {currentData.challenges?.map((challenge: any, idx: number) => (
-                      <ChallengeCard key={idx} challenge={challenge} />
+                    {currentData.challenges?.map((challenge: any) => (
+                      <ChallengeCard key={`${challenge.leader ?? 'challenge'}-${challenge.specialty ?? 'mixed'}-${challenge.acePokemon ?? 'unknown'}`} challenge={challenge} />
                     ))}
                   </div>
                 </div>
@@ -272,29 +268,23 @@ export const TeamAdventureAnalyzer = memo(function TeamAdventureAnalyzer() {
 
               {activeTab === 'individual' && currentData.pokemon && (
                 <div className="adventure-analyzer__pokemon-grid">
-                  {currentData.pokemon.map((pkmn: any, index: number) => {
+                  {currentData.pokemon.map((pkmn: any) => {
                     const teamMember = filledTeam.find(p => p!.name.toLowerCase() === pkmn.name.toLowerCase());
                     
                     return (
-                      <div key={index} className="adventure-analyzer__pokemon-card">
+                      <div key={pkmn.name} className="adventure-analyzer__pokemon-card">
                         {teamMember && (
-                          <div
+                          <button
+                            type="button"
                             className="adventure-analyzer__pokemon-image adventure-analyzer__pokemon-image--clickable"
                             onClick={() => openDetail(teamMember.id)}
                             title={`Ver ficha de ${pkmn.name}`}
-                            role="button"
-                            tabIndex={0}
-                            onKeyDown={e => e.key === 'Enter' && openDetail(teamMember.id)}
                           >
                             <img src={getOfficialArtwork(teamMember.id)} alt={pkmn.name} loading="lazy" />
-                          </div>
+                          </button>
                         )}
                         <div className="adventure-analyzer__pokemon-info">
-                          <h4
-                            className="adventure-analyzer__pokemon-name adventure-analyzer__pokemon-name--clickable"
-                            onClick={() => teamMember && openDetail(teamMember.id)}
-                            title={teamMember ? `Ver ficha de ${pkmn.name}` : ''}
-                          >
+                          <h4 className="adventure-analyzer__pokemon-name">
                             {pkmn.name}
                             {teamMember && (
                               <span className="adventure-analyzer__pokemon-link-icon">

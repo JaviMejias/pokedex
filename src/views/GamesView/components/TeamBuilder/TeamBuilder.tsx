@@ -21,12 +21,10 @@ const PremiumTeamSlot = memo(function PremiumTeamSlot({ member, openDetail }: { 
   const highestStat = data ? data.stats.reduce((prev, curr) => (prev.base_stat > curr.base_stat) ? prev : curr) : null;
   
   return (
-    <div 
+    <button
+      type="button"
       className={`team-builder__slot-link team-builder__slot-link--premium type-${primaryType}`}
       onClick={() => openDetail(member.id)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={e => e.key === 'Enter' && openDetail(member.id)}
       style={{ '--slot-type-color': `var(--color-type-${primaryType})` } as React.CSSProperties}
     >
       <div className="team-builder__slot-bg" />
@@ -50,7 +48,7 @@ const PremiumTeamSlot = memo(function PremiumTeamSlot({ member, openDetail }: { 
           </div>
         )}
       </div>
-    </div>
+    </button>
   );
 });
 
@@ -168,6 +166,13 @@ export const TeamBuilder = memo(function TeamBuilder() {
               aria-label={member ? member.name : es.games.team.empty}
               onClick={() => {
                 if (!member) {
+                  setActiveSlotIndex(i);
+                  document.getElementById('team-search')?.focus();
+                }
+              }}
+              onKeyDown={(e) => {
+                if (!member && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault();
                   setActiveSlotIndex(i);
                   document.getElementById('team-search')?.focus();
                 }

@@ -52,14 +52,15 @@ const ExploreView = memo(function ExploreView() {
     const isNumber = /^\d+$/.test(debouncedQuery.trim());
     setIsSearching(true);
 
+    let cancelled = false;
     (async () => {
       try {
         if (isNumber) {
           const result = await fetchPokemon(debouncedQuery.trim().toLowerCase());
-          setSearchResults([result]);
+          if (!cancelled) setSearchResults([result]);
         } else {
           if (debouncedQuery.trim().length < 2) {
-            setSearchResults(null);
+            if (!cancelled) setSearchResults(null);
             return;
           }
           const allNames = await fetchAllPokemonNames(); // Esto se saca de IndexedDB (caché local)
@@ -74,18 +75,21 @@ const ExploreView = memo(function ExploreView() {
           const topMatches = matches.slice(0, 20);
           const detailed = await Promise.allSettled(topMatches.map(m => fetchPokemon(m.name)));
           
-          setSearchResults(
-            detailed
-              .filter((r): r is PromiseFulfilledResult<Pokemon> => r.status === 'fulfilled')
-              .map(r => r.value)
-          );
+          if (!cancelled) {
+            setSearchResults(
+              detailed
+                .filter((r): r is PromiseFulfilledResult<Pokemon> => r.status === 'fulfilled')
+                .map(r => r.value)
+            );
+          }
         }
       } catch {
-        setSearchResults([]);
+        if (!cancelled) setSearchResults([]);
       } finally {
-        setIsSearching(false);
+        if (!cancelled) setIsSearching(false);
       }
     })();
+    return () => { cancelled = true; };
   }, [debouncedQuery, showFavorites]);
 
   // Efecto para cargar y mostrar favoritos
@@ -414,16 +418,16 @@ const ExploreView = memo(function ExploreView() {
         )}
 
         {!error && (
-          <div className="explore-view__grid" role="list" aria-label="Lista de Pokémon">
+          <ul className="explore-view__grid" aria-label="Lista de Pokémon">
             {isLoading && !pokemon.length
               ? Array.from({ length: 20 }).map((_, i) => <SkeletonCard key={i} />)
               : displayedPokemon.map((p, i) => (
-                  <div key={p.id} role="listitem">
+                  <li key={p.id}>
                     <PokemonCard pokemon={p} index={i} />
-                  </div>
+                  </li>
                 ))
             }
-          </div>
+          </ul>
         )}
 
         {/* Infinite scroll sentinel */}

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useMemo, ReactNode } from 'react';
 
 interface RotomContextValue {
   contextMessage: string;
@@ -9,8 +9,9 @@ const RotomContext = createContext<RotomContextValue | null>(null);
 
 export function RotomProvider({ children }: { children: ReactNode }) {
   const [contextMessage, setContextMessage] = useState('');
+  const value = useMemo(() => ({ contextMessage, setContextMessage }), [contextMessage]);
   return (
-    <RotomContext.Provider value={{ contextMessage, setContextMessage }}>
+    <RotomContext.Provider value={value}>
       {children}
     </RotomContext.Provider>
   );

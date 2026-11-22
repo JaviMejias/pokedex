@@ -83,15 +83,27 @@ const PokemonDetail = memo(function PokemonDetail() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isDetailOpen) closeDetail();
+      if (!isDetailOpen) return;
+      if (e.key === 'Escape') {
+        closeDetail();
+        return;
+      }
+      if (e.key !== 'Tab' || !modalRef.current) return;
+      const focusable = modalRef.current.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!first || !last) return;
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isDetailOpen, closeDetail]);
-
-  const handleBackdropClick = useCallback((e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) closeDetail();
-  }, [closeDetail]);
 
   const showToast = useCallback((msg: string) => {
     setToastMessage(msg);
@@ -147,11 +159,10 @@ const PokemonDetail = memo(function PokemonDetail() {
   }
 
   return (
-    <div
+    <dialog
       className="pokemon-detail-overlay"
-      onClick={handleBackdropClick}
-      role="dialog"
       aria-modal="true"
+      open
       aria-label={selectedPokemon ? `Detalles de ${selectedPokemon.name}` : 'Cargando Pokémon'}
       aria-busy={isDetailLoading}
     >
@@ -319,7 +330,7 @@ const PokemonDetail = memo(function PokemonDetail() {
         </div>
       </div>
       
-    </div>
+    </dialog>
   );
 });
 

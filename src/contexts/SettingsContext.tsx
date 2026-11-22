@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback, ReactNode } from 'react';
 import { STORAGE_KEYS } from '@/constants';
 
 type Skin = 'modern' | 'retro';
@@ -28,12 +28,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     }
   }, [skin]);
 
-  const toggleSkin = () => {
+  const toggleSkin = useCallback(() => {
     setSkin(prev => (prev === 'retro' ? 'modern' : 'retro'));
-  };
+  }, []);
+
+  const value = useMemo(() => ({ skin, toggleSkin }), [skin, toggleSkin]);
 
   return (
-    <SettingsContext.Provider value={{ skin, toggleSkin }}>
+    <SettingsContext.Provider value={value}>
       {children}
     </SettingsContext.Provider>
   );

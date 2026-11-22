@@ -4,6 +4,7 @@ import { useSettings } from '@/contexts/SettingsContext';
 import { useApiKey } from '@/hooks/useApiKey';
 import { usePWA } from '@/hooks/usePWA';
 import { STORAGE_KEYS } from '@/constants';
+import { GlobalSettingsPanel } from './GlobalSettingsPanel';
 import './GlobalSettings.css';
 
 declare global {
@@ -251,105 +252,29 @@ const GlobalSettings = memo(function GlobalSettings() {
           </span>
         </button>
 
-        {/* Expanded Panel */}
-        {isExpanded && (
-          <div className="global-settings-panel">
-            <div className="global-settings-panel__header">
-              <span className="global-settings-panel__title">Ajustes</span>
-              <button className="global-settings-panel__close" onClick={() => setIsExpanded(false)}>✕</button>
-            </div>
-            
-            <div className="global-settings-panel__section">
-              <span className="global-settings-panel__section-title">Visuales</span>
-              <div className="global-settings-panel__actions">
-                <button className="global-settings-panel__btn" onClick={toggleTheme} title="Cambiar Tema">
-                  {theme === 'dark' ? '☀️ Claro' : '🌙 Oscuro'}
-                </button>
-                <button className="global-settings-panel__btn" onClick={toggleSkin} title="Cambiar Diseño">
-                  {skin === 'retro' ? '🖥️ Modo PC' : '📱 Modo Consola'}
-                </button>
-              </div>
-            </div>
-
-            <div className="global-settings-panel__section">
-              <span className="global-settings-panel__section-title">Inteligencia Artificial (Gemini)</span>
-              <form className="global-settings-panel__api-form" onSubmit={handleSaveApiKey}>
-                <input
-                  type="password"
-                  className="global-settings-panel__input"
-                  placeholder="Pega tu API Key de Gemini..."
-                  value={apiKeyInput}
-                  onChange={e => setApiKeyInput(e.target.value)}
-                  autoComplete="off"
-                />
-                <button type="submit" className="global-settings-panel__btn-small">
-                  {apiKeySaved ? '✓ Guardada' : apiKey ? '🔑 Actualizar' : '🔑 Guardar'}
-                </button>
-              </form>
-              {apiKey && <p className="global-settings-panel__api-hint">API Key activa ✓ — Rotom Dex y Scanner están listos.</p>}
-              {!apiKey && <p className="global-settings-panel__api-hint"><a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer">Obtener clave gratuita →</a></p>}
-            </div>
-
-            <div className="global-settings-panel__section">
-              <span className="global-settings-panel__section-title">Sistema</span>
-              <div className="global-settings-panel__actions">
-                <button className="global-settings-panel__btn" onClick={() => forceReload()} title="Recargar App">
-                  🔄 Recargar caché
-                </button>
-              </div>
-            </div>
-
-            {isAvailable && (
-              <div className="global-settings-panel__section global-settings-panel__audio">
-                <span className="global-settings-panel__section-title">Música Lofi</span>
-                <div className="global-settings-panel__audio-controls">
-                  <button className="global-settings-panel__audio-btn" onClick={handlePrev} title="Anterior">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
-                  </button>
-                  
-                  <button className="global-settings-panel__audio-btn global-settings-panel__audio-btn--main" onClick={togglePlay} title={isPlaying ? "Pausar" : "Reproducir"}>
-                    {isPlaying ? (
-                       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                    ) : (
-                       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                    )}
-                  </button>
-                  
-                  <button className="global-settings-panel__audio-btn" onClick={handleNext} title="Siguiente">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
-                  </button>
-                </div>
-                
-                <div className="global-settings-panel__volume">
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
-                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                  </svg>
-                  <input 
-                    type="range" 
-                    min="0" 
-                    max="100" 
-                    value={volume} 
-                    onChange={handleVolumeChange}
-                    className="global-settings-panel__slider"
-                    aria-label="Volumen"
-                  />
-                </div>
-
-                <div className="global-settings-panel__custom-url">
-                  <input 
-                    type="text" 
-                    className="global-settings-panel__input" 
-                    placeholder="URL o ID de YouTube..."
-                    value={youtubeUrl}
-                    onChange={e => setYoutubeUrl(e.target.value)}
-                  />
-                  <button className="global-settings-panel__btn-small" onClick={loadCustomUrl}>Cargar</button>
-                </div>
-
-              </div>
-            )}
-          </div>
-        )}
+        {isExpanded && <GlobalSettingsPanel
+          theme={theme}
+          skin={skin}
+          toggleTheme={toggleTheme}
+          toggleSkin={toggleSkin}
+          apiKey={apiKey}
+          apiKeyInput={apiKeyInput}
+          setApiKeyInput={setApiKeyInput}
+          handleSaveApiKey={handleSaveApiKey}
+          apiKeySaved={apiKeySaved}
+          forceReload={forceReload}
+          isAvailable={isAvailable}
+          handlePrev={handlePrev}
+          togglePlay={togglePlay}
+          isPlaying={isPlaying}
+          handleNext={handleNext}
+          volume={volume}
+          handleVolumeChange={handleVolumeChange}
+          youtubeUrl={youtubeUrl}
+          setYoutubeUrl={setYoutubeUrl}
+          loadCustomUrl={loadCustomUrl}
+          close={() => setIsExpanded(false)}
+        />}
       </div>
     </>
   );

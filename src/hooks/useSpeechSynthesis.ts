@@ -2,13 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 
 export function useSpeechSynthesis() {
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isSupported, setIsSupported] = useState(false);
+  const [isSupported] = useState(() => typeof window !== 'undefined' && 'speechSynthesis' in window);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.speechSynthesis) {
-      setIsSupported(true);
-      
       const updateVoices = () => {
         setVoices(window.speechSynthesis.getVoices());
       };
@@ -16,9 +14,8 @@ export function useSpeechSynthesis() {
       updateVoices();
       
       // In some browsers, voices are loaded asynchronously
-      if (window.speechSynthesis.onvoiceschanged !== undefined) {
-        window.speechSynthesis.onvoiceschanged = updateVoices;
-      }
+      window.speechSynthesis.addEventListener('voiceschanged', updateVoices);
+      return () => window.speechSynthesis.removeEventListener('voiceschanged', updateVoices);
     }
   }, []);
 

@@ -12,6 +12,7 @@ async function getBestAvailableModel(apiKey: string): Promise<string> {
   if (cachedModelName) return cachedModelName;
   try {
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+    if (!response.ok) throw new Error(`Gemini models request failed: ${response.status}`);
     const data = await response.json();
     if (data && data.models) {
       console.log("Available models:", data.models.map((m: any) => m.name));

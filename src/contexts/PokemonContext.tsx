@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useRef, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { flushSync } from 'react-dom';
 import type { Pokemon } from '@/types/pokemon';
 import { fetchPokemon } from '@/services/pokemonService';
@@ -70,7 +70,6 @@ export function PokemonProvider({ children }: { children: React.ReactNode }) {
         { id: pokemon.id, name: pokemon.name, timestamp: Date.now() },
         ...filtered,
       ].slice(0, HISTORY_MAX_SIZE);
-      saveHistory(newHistory);
       return newHistory;
     });
   }, []);
@@ -128,8 +127,9 @@ export function PokemonProvider({ children }: { children: React.ReactNode }) {
 
   const clearHistory = useCallback(() => {
     setHistory([]);
-    saveHistory([]);
   }, []);
+
+  useEffect(() => { saveHistory(history); }, [history]);
 
   const value = useMemo<PokemonContextValue>(() => ({
     selectedPokemon,

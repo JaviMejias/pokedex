@@ -62,16 +62,17 @@ const RotomDex = memo(function RotomDex({ pokemonName, contextMessage, isOpen, o
       parts: [{ text: m.text }]
     }));
 
-    const responseText = await askRotomDex(apiKey, userText, history as any, pokemonName, contextMessage);
-
-    const newModelMsg: Message = {
-      id: (Date.now() + 1).toString(),
-      role: 'model',
-      text: responseText
-    };
-
-    setMessages(prev => [...prev, newModelMsg]);
-    setIsLoading(false);
+    try {
+      const responseText = await askRotomDex(apiKey, userText, history as any, pokemonName, contextMessage);
+      const newModelMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'model',
+        text: responseText
+      };
+      setMessages(prev => [...prev, newModelMsg]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSaveKey = (e: React.FormEvent) => {
@@ -84,7 +85,7 @@ const RotomDex = memo(function RotomDex({ pokemonName, contextMessage, isOpen, o
   if (!isOpen) return null;
 
   return (
-    <div className="rotom-dex-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+    <dialog className="rotom-dex-overlay" open aria-label="Rotom Dex">
       <div className="rotom-dex">
         <div className="rotom-dex__header">
           <div className="rotom-dex__eyes">
@@ -101,7 +102,9 @@ const RotomDex = memo(function RotomDex({ pokemonName, contextMessage, isOpen, o
           <div className="rotom-dex__auth">
             <p className="rotom-dex__auth-msg">¡Bzzzt! Necesito una API Key de Google AI Studio para funcionar. ¡Es gratis!</p>
             <form onSubmit={handleSaveKey} className="rotom-dex__auth-form">
+              <label htmlFor="rotom-api-key" className="sr-only">Clave API de Gemini</label>
               <input 
+                id="rotom-api-key"
                 type="password" 
                 placeholder="Pega tu API Key aquí" 
                 value={keyInput}
@@ -135,7 +138,9 @@ const RotomDex = memo(function RotomDex({ pokemonName, contextMessage, isOpen, o
         </div>
 
           <form className="rotom-dex__input-area" onSubmit={handleSend}>
+            <label htmlFor="rotom-message" className="sr-only">Mensaje para Rotom Dex</label>
             <input
+              id="rotom-message"
               type="text"
               className="rotom-dex__input"
               placeholder="Pregúntale a Rotom..."
@@ -143,8 +148,8 @@ const RotomDex = memo(function RotomDex({ pokemonName, contextMessage, isOpen, o
               onChange={(e) => setInput(e.target.value)}
               disabled={isLoading}
             />
-            <button type="submit" className="rotom-dex__send-btn" disabled={!input.trim() || isLoading}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <button type="submit" className="rotom-dex__send-btn" aria-label="Enviar mensaje" disabled={!input.trim() || isLoading}>
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="22" y1="2" x2="11" y2="13" />
                 <polygon points="22 2 15 22 11 13 2 9 22 2" />
               </svg>
@@ -153,7 +158,7 @@ const RotomDex = memo(function RotomDex({ pokemonName, contextMessage, isOpen, o
         </>
         )}
       </div>
-    </div>
+    </dialog>
   );
 });
 

@@ -120,7 +120,9 @@ const ScannerView = memo(function ScannerView() {
               <p className="scanner-view__status-text" style={{ color: 'white' }}>¡Se necesita una API Key!</p>
               <p className="scanner-view__status-hint">Para usar el escáner con Inteligencia Artificial, configura tu clave gratuita de Google AI Studio.</p>
               <form onSubmit={handleSaveKey} style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px', width: '100%' }}>
+                <label htmlFor="scanner-api-key" className="sr-only">Clave API de Gemini</label>
                 <input 
+                  id="scanner-api-key"
                   type="password" 
                   placeholder="Pega tu API Key aquí" 
                   value={keyInput}

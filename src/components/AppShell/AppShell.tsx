@@ -27,19 +27,19 @@ const PWABanners = memo(function PWABanners() {
             <button onClick={applyUpdate} className="app-shell__banner-btn app-shell__banner-btn--primary" type="button">
               {es.pwa.updateNow}
             </button>
-            <button onClick={dismissUpdate} className="app-shell__banner-btn" type="button">✕</button>
+              <button onClick={dismissUpdate} className="app-shell__banner-btn" type="button" aria-label="Cerrar aviso de actualización">✕</button>
           </div>
         </div>
       )}
       {canInstall && (
-        <div className="app-shell__banner app-shell__banner--install" role="complementary">
+        <aside className="app-shell__banner app-shell__banner--install">
           <div className="app-shell__banner-actions" style={{ width: '100%', justifyContent: 'center' }}>
             <button onClick={install} className="app-shell__banner-btn app-shell__banner-btn--primary" type="button">
               {es.pwa.install}
             </button>
             <button onClick={dismissInstall} className="app-shell__banner-btn" type="button" aria-label="Cerrar">✕</button>
           </div>
-        </div>
+        </aside>
       )}
     </>
   );

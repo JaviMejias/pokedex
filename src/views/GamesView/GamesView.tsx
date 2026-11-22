@@ -147,6 +147,14 @@ const GamesView = memo(function GamesView() {
                       setAnalyzingSharedTeam(false);
                       setActiveTab('advisor');
                     }}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.currentTarget.click();
+                      }
+                    }}
                   >
                     <img src={p.sprites.front_default || ''} alt={p.name} className="shared-team-banner__sprite" />
                     <span className="shared-team-banner__name pokemon-name">{p.name}</span>

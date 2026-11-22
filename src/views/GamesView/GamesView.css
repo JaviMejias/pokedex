@@ -1429,6 +1429,10 @@
 
 /* Premium Team Slot CSS (Trading Card Style) */
 .team-builder__slot-link--premium {
+  border: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
   position: absolute;
   top: 0;
   left: 0;

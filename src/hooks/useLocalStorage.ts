@@ -11,16 +11,16 @@ export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T 
   });
 
   const setValue = useCallback((value: T | ((prev: T) => T)) => {
-    setStoredValue(prev => {
-      const next = value instanceof Function ? value(prev) : value;
-      try {
-        localStorage.setItem(key, JSON.stringify(next));
-      } catch {
-        // ignore
-      }
-      return next;
-    });
-  }, [key]);
+    setStoredValue(prev => value instanceof Function ? value(prev) : value);
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(key, JSON.stringify(storedValue));
+    } catch {
+      // ignore
+    }
+  }, [key, storedValue]);
 
   useEffect(() => {
     const handler = (e: StorageEvent) => {

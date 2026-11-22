@@ -40,33 +40,35 @@ export function usePWA(): PWAState {
   }, []);
 
   useEffect(() => {
-    window.addEventListener('appinstalled', () => {
+    const handleAppInstalled = () => {
       setIsInstalled(true);
       setInstallPrompt(null);
-    });
+    };
+    window.addEventListener('appinstalled', handleAppInstalled);
+    return () => window.removeEventListener('appinstalled', handleAppInstalled);
   }, []);
 
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
 
+    let cancelled = false;
+
     navigator.serviceWorker.register('/sw.js').then((reg) => {
+      if (cancelled) return;
       setRegistration(reg);
-      reg.addEventListener('updatefound', () => {
-        const newWorker = reg.installing;
-        if (!newWorker) return;
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            setHasUpdate(true);
-          }
-        });
-      });
+      if (reg.waiting && navigator.serviceWorker.controller) setHasUpdate(true);
     }).catch(() => {
       // SW not supported or blocked
     });
 
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
+    const handleControllerChange = () => {
       console.log('Service Worker updated.');
-    });
+    };
+    navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
+    return () => {
+      cancelled = true;
+      navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
+    };
   }, []);
 
   const install = async () => {

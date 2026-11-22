@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import { STORAGE_KEYS, TEAM_MAX_SIZE } from '@/constants';
 import type { TeamMember } from '@/types/pokemon';
 
@@ -91,7 +91,6 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const toggleFavorite = useCallback((id: number, _name: string) => {
     setFavorites(prev => {
       const next = prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id];
-      saveFavorites(next);
       return next;
     });
   }, []);
@@ -107,7 +106,6 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   }, [team]);
 
   const addToTeam = useCallback((id: number, name: string, speciesName?: string, targetIndex?: number): boolean => {
-    let wasAdded = false;
     setTeam(prev => {
       // Inline isInTeam check using 'prev' state instead of stale closure
       const isDuplicate = prev.some(m => {
@@ -123,27 +121,20 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       const next = [...prev];
       if (targetIndex !== undefined && targetIndex >= 0 && targetIndex < TEAM_MAX_SIZE) {
         next[targetIndex] = { id, name, speciesName };
-        wasAdded = true;
       } else {
         const emptyIdx = next.findIndex(m => !m);
         if (emptyIdx !== -1) {
           next[emptyIdx] = { id, name, speciesName };
-          wasAdded = true;
         }
       }
-      if (wasAdded) saveTeam(next);
       return next;
     });
-    // This return value might not be perfectly synchronous if we just added it, 
-    // but the UI typically doesn't strictly rely on this returning false except for silent fails.
-    // Assuming true since we allow silent fails mostly.
     return true; 
   }, []);
 
   const removeFromTeam = useCallback((id: number) => {
     const next = team.map(m => m?.id === id ? null : m);
     setTeam(next);
-    saveTeam(next);
   }, [team]);
 
   const swapInTeam = useCallback((idx1: number, idx2: number) => {
@@ -153,7 +144,6 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
       const temp = next[idx1];
       next[idx1] = next[idx2];
       next[idx2] = temp;
-      saveTeam(next);
       return next;
     });
   }, []);
@@ -161,7 +151,6 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
   const clearTeam = useCallback(() => {
     const next = Array(TEAM_MAX_SIZE).fill(null);
     setTeam(next);
-    saveTeam(next);
   }, []);
 
   const saveCurrentTeam = useCallback((name: string) => {
@@ -175,7 +164,6 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     };
     setSavedTeams(prev => {
       const next = [newEntry, ...prev].slice(0, 20); // max 20 saved teams
-      saveSavedTeams(next);
       return next;
     });
   }, [team]);
@@ -185,16 +173,18 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     if (!found) return;
     const restored = Array(TEAM_MAX_SIZE).fill(null).map((_, i) => found.members[i] ?? null) as (TeamMember | null)[];
     setTeam(restored);
-    saveTeam(restored);
   }, [savedTeams]);
 
   const deleteSavedTeam = useCallback((id: string) => {
     setSavedTeams(prev => {
       const next = prev.filter(t => t.id !== id);
-      saveSavedTeams(next);
       return next;
     });
   }, []);
+
+  useEffect(() => { saveFavorites(favorites); }, [favorites]);
+  useEffect(() => { saveTeam(team); }, [team]);
+  useEffect(() => { saveSavedTeams(savedTeams); }, [savedTeams]);
 
   const value = useMemo<FavoritesContextValue>(() => ({
     favorites,
